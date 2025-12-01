@@ -1,59 +1,70 @@
-# UrlShortenerNg
+# URL Shortener Frontend (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.1.
+A minimal Angular frontend for a FastAPI-based URL shortener service.  
+Users can enter a URL, send it to the API, and receive a shortened link with a simple, clean interface.
 
-## Development server
+## Features
+- Input field to submit a URL
+- Auto-adds `https://` if the scheme is missing
+- Calls backend `/api/shorten`
+- Displays original + shortened URL
+- Copy-to-clipboard support
+- Lightweight UI using plain CSS
 
-To start a local development server, run:
+## Tech Stack
+- Angular 17+ (standalone components)
+- TypeScript
+- Angular HttpClient (with `fetch`)
+- Pure CSS
 
+## Setup
+
+### Install dependencies
+```bash
+npm install
+```
+
+### Start development server
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Frontend runs at:
+http://localhost:4200/
 
-## Code scaffolding
+### Backend expected
+Your API should expose:
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+`POST /api/shorten`
 
-```bash
-ng generate component component-name
-```
+Configure the API URL in:
+`src/environments/environment.ts`
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
+## Build for production
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Output will be available in `dist/`.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
+## Project Structure (core files)
+```
+src/
+  main.ts
+  index.html
+  styles.css
+  environments/
+    environment.ts
+  app/
+    app.ts
+    app.html
+    app.css
+    services/
+      url-shortener.service.ts
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Roadmap
+- Stats page (`/api/stats/{code}`)
+- Better UI styling
+- Local history of shortened URLs
+- Custom aliases
