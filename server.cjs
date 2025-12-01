@@ -7,7 +7,7 @@ const distDir = path.join(__dirname, 'dist', 'url-shortener-ng', 'browser');
 
 app.use(express.static(distDir));
 
-app.get('*', (req, res) => {
+app.get('/health', (req, res) => {
   res.sendFile(path.join(distDir, 'index.html'));
 });
 
