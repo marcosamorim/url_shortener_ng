@@ -3,11 +3,21 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    // Local dev
+    "start:dev": "ng serve",
+    // Heroku / production: run the Node server
+    "start": "node server.cjs",
+    // Build Angular app
     "build": "ng build",
+    // Optional dev helper
     "watch": "ng build --watch --configuration development",
+    // Tests (if you use them)
     "test": "ng test",
-    "serve:ssr:url-shortener-ng": "node dist/url-shortener-ng/server/server.mjs"
+    // Heroku will run this after npm install
+    "heroku-postbuild": "ng build --configuration production"
+  },
+  "engines": {
+    "node": "20.x"
   },
   "prettier": {
     "printWidth": 100,
