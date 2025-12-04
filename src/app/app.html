@@ -91,29 +91,41 @@
           </div>
 
           @if (showQr()) {
-            <div class="qr-card" #qrCard>
-              <div class="qr-url">{{ shortUrlLabel }}</div>
+            <div class="qr-container">
+              <div class="qr-card" #qrCard>
+                <div class="qr-url">{{ shortUrlLabel }}</div>
 
-              <div class="qr-code-wrapper">
-                <qrcode
-                  [qrdata]="result()!.short_url"
-                  [width]="220"
-                  [errorCorrectionLevel]="'H'"
-                ></qrcode>
+                <div class="qr-code-wrapper">
+                  <qrcode
+                    [qrdata]="result()!.short_url"
+                    [width]="220"
+                    [errorCorrectionLevel]="'H'"
+                  ></qrcode>
 
-                <div class="qr-logo">
-                  <div class="qr-logo-inner">rdrt</div>
+                  <div class="qr-logo">
+                    <div class="qr-logo-inner">rdrt</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <button
-              type="button"
-              class="btn btn-secondary btn-sm qr-download-btn"
-              (click)="downloadQrCard()"
-            >
-              Download card
-            </button>
+              <div class="qr-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary qr-action-btn"
+                  (click)="downloadQrCard()"
+                >
+                  Download card
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-secondary qr-action-btn"
+                  (click)="copyQrCardToClipboard()"
+                >
+                  Copy card
+                </button>
+              </div>
+            </div>
           }
         </div>
       </section>

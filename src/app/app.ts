@@ -187,4 +187,103 @@ export class App {
       this.showToast('Failed to download QR card');
     }
   }
+  // Simpler solution, but doesn't work on Safari, only Chrome
+  // Leaving it here for case study mainly
+  // async copyQrCardToClipboard() {
+  //   if (!this.qrCardRef) {
+  //     this.showToast('QR card not ready');
+  //     return;
+  //   }
+  //
+  //   // Browser support check
+  //   if (
+  //     !('clipboard' in navigator) ||
+  //     typeof (window as any).ClipboardItem === 'undefined'
+  //   ) {
+  //     this.showToast('Image clipboard not supported in this browser');
+  //     return;
+  //   }
+  //
+  //   const element = this.qrCardRef.nativeElement;
+  //
+  //   try {
+  //     const canvas = await html2canvas(element, {
+  //       scale: 3,              // keep the high-res export
+  //       backgroundColor: null,
+  //     });
+  //
+  //     const blob: Blob | null = await new Promise((resolve) =>
+  //       canvas.toBlob((b) => resolve(b), 'image/png'),
+  //     );
+  //
+  //     if (!blob) {
+  //       this.showToast('Failed to copy QR card (no blob)');
+  //       return;
+  //     }
+  //
+  //     const clipboardItem = new (window as any).ClipboardItem({
+  //       [blob.type]: blob,
+  //     });
+  //
+  //     await (navigator as any).clipboard.write([clipboardItem]);
+  //     this.showToast('QR card copied!');
+  //   } catch (e) {
+  //     this.showToast('Failed to copy QR card (exception error)');
+  //   }
+  // }
+  // Solution that works on both Safari and Chrome
+  copyQrCardToClipboard() {
+    if (!this.qrCardRef) {
+      this.showToast('QR card not ready');
+      return;
+    }
+
+    // Basic feature check
+    const hasClipboardWrite =
+      'clipboard' in navigator &&
+      typeof (navigator as any).clipboard.write === 'function' &&
+      typeof (window as any).ClipboardItem === 'function';
+
+    if (!hasClipboardWrite) {
+      this.showToast('Image clipboard is not supported in this browser');
+      return;
+    }
+
+    const element = this.qrCardRef.nativeElement;
+
+    // IMPORTANT: call clipboard.write immediately in the click handler,
+    // and give it a Promise that will resolve to the PNG blob.
+    const clipboardItem = new (window as any).ClipboardItem({
+      'image/png': new Promise<Blob>(async (resolve, reject) => {
+        try {
+          const canvas = await html2canvas(element, {
+            scale: 3,              // high-res
+            backgroundColor: null,
+          });
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error('Failed to create blob from canvas'));
+              }
+            },
+            'image/png',
+          );
+        } catch (err) {
+          reject(err);
+        }
+      }),
+    });
+
+    (navigator as any).clipboard
+      .write([clipboardItem])
+      .then(() => {
+        this.showToast('QR card copied!');
+      })
+      .catch(() => {
+        this.showToast('Failed to copy QR card');
+      });
+  }
 }
