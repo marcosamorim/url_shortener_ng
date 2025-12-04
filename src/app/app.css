@@ -363,14 +363,29 @@ button:disabled {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
   }
+  /* Row that contains the LONG URL input + Shorten button */
+  .input-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .input-row input,
+  .input-row .btn-primary {
+    width: 100%;
+  }
+
+  .input-row .btn-primary {
+    justify-content: center; /* if your button is flex */
+  }
 
   /* The block that holds "SHORT URL + original" + QR.
-     Whatever you called it (you had .result-main earlier),
-     force it to stack vertical on phones. */
+     Force it to stack vertical on phones. */
   .result-main {
     flex-direction: column;
     align-items: stretch;
-    gap: 1.25rem;
+    gap: 0.75rem;
   }
 
   /* Short URL + buttons row */
@@ -394,7 +409,9 @@ button:disabled {
   /* QR container: remove desktop left offset */
   .qr-container {
     margin-left: 0;
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
     align-self: center;
   }
+
 }
+
