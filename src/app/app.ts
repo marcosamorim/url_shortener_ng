@@ -40,21 +40,24 @@ export class App {
       return;
     }
 
-    let inputUrl = trimmed;
+    // 1) Normalise (add https:// if missing)
+    const normalisedUrl = this.normaliseUrl(trimmed);
 
-    if (
-      !inputUrl.startsWith('http://') &&
-      !inputUrl.startsWith('https://')
-    ) {
-      inputUrl = 'https://' + inputUrl;
+    // 2) Validate
+    const validationError = this.validateUrl(normalisedUrl);
+    if (validationError) {
+      this.error.set(validationError);
+      this.result.set(null);
+      return;
     }
 
+    // 3) Clear previous state and call API
     this.error.set(null);
     this.result.set(null);
     this.isLoading.set(true);
     this.cdr.detectChanges();
 
-    this.urlShortener.shorten(inputUrl).subscribe({
+    this.urlShortener.shorten(normalisedUrl).subscribe({
       next: (res) => {
         this.result.set(res);
         this.isLoading.set(false);
@@ -70,6 +73,45 @@ export class App {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  /**
+   * Adds https:// if the user didn't type a scheme.
+   */
+  private normaliseUrl(raw: string): string {
+    // generic "scheme://" check
+    const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(raw);
+    if (!hasScheme) {
+      return 'https://' + raw;
+    }
+    return raw;
+  }
+
+  /**
+   * Validates URL using the browser URL parser and enforces http/https.
+   * Returns error message string, or null if valid.
+   */
+  private validateUrl(url: string): string | null {
+    try {
+      const parsed = new URL(url);
+
+      if (!['http:', 'https:'].includes(parsed.protocol)) {
+        return 'Only http and https URLs are supported.';
+      }
+
+      if (!parsed.hostname) {
+        return 'Please enter a valid domain.';
+      }
+
+      // Optional: require at least one dot (reject "https://test")
+      if (!parsed.hostname.includes('.')) {
+        return 'Please enter a full domain (e.g. example.com).';
+      }
+
+      return null;
+    } catch {
+      return 'Please enter a valid URL.';
+    }
   }
 
   async copyShortUrl() {
