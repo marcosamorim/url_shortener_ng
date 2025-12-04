@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -18,9 +18,13 @@ export class App {
   title = 'URL Shortener';
 
   url = '';
-  isLoading = false;
-  error: string | null = null;
-  result: ShortenResponse | null = null;
+
+  isLoading = signal(false);
+  error = signal<string | null>(null);
+  result = signal<ShortenResponse | null>(null);
+
+  toastMessage = signal<string | null>(null);
+
   apiBaseUrl = environment.apiBaseUrl;
 
   constructor(
@@ -29,44 +33,63 @@ export class App {
   ) {}
 
   onSubmit() {
-    if (!this.url) {
-      this.error = 'Please enter a URL.';
+    const trimmed = this.url.trim();
+
+    if (!trimmed) {
+      this.error.set('Please enter a URL.');
       return;
     }
 
-    let inputUrl = this.url.trim();
-    if (!inputUrl.startsWith('http://') && !inputUrl.startsWith('https://')) {
+    let inputUrl = trimmed;
+
+    if (
+      !inputUrl.startsWith('http://') &&
+      !inputUrl.startsWith('https://')
+    ) {
       inputUrl = 'https://' + inputUrl;
     }
 
-    this.error = null;
-    this.result = null;
-    this.isLoading = true;
-    this.cdr.detectChanges(); // reflect loading state immediately
+    this.error.set(null);
+    this.result.set(null);
+    this.isLoading.set(true);
+    this.cdr.detectChanges();
 
     this.urlShortener.shorten(inputUrl).subscribe({
       next: (res) => {
-        this.result = res;
-        this.isLoading = false;
-        this.cdr.detectChanges(); // FORCE UI UPDATE
+        this.result.set(res);
+        this.isLoading.set(false);
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.isLoading = false;
-        this.error =
+        this.isLoading.set(false);
+        const msg =
           err?.error?.detail ||
           err.message ||
           'Failed to shorten URL. Please try again.';
-        this.cdr.detectChanges(); // FORCE UI UPDATE
+        this.error.set(msg);
+        this.cdr.detectChanges();
       },
     });
   }
 
   async copyShortUrl() {
-    if (!this.result?.short_url) return;
+    const current = this.result();
+    if (!current?.short_url) return;
+
     try {
-      await navigator.clipboard.writeText(this.result.short_url);
-    } catch (err) {
-      console.error('Failed to copy:', err);
+      await navigator.clipboard.writeText(current.short_url);
+      this.showToast('Copied!');
+    } catch {
+      this.showToast('Copy failed');
     }
+  }
+
+  showToast(message: string) {
+    this.toastMessage.set(message);
+
+    setTimeout(() => {
+      this.toastMessage.set(null);
+      this.cdr.detectChanges();
+    }, 2000);
   }
 }

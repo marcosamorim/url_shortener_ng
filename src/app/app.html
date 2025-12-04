@@ -19,16 +19,16 @@
           [(ngModel)]="url"
           placeholder="https://example.com/very/long/link"
           class="input"
-          [class.input-error]="error"
+          [class.input-error]="error()"
           autocomplete="off"
         />
 
         <button
           type="submit"
           class="btn btn-primary"
-          [disabled]="isLoading || !url"
+          [disabled]="isLoading() || !url"
         >
-          @if (!isLoading) {
+          @if (!isLoading()) {
             Shorten
           } @else {
             <span class="spinner"></span>
@@ -36,27 +36,32 @@
         </button>
       </div>
 
-      @if (error) {
-        <p class="error">{{ error }}</p>
+      @if (error()) {
+        <p class="error">
+          {{ error() }}
+        </p>
       }
     </form>
 
-    <!-- RESULT SECTION -->
-    @if (result) {
+    @if (result()) {
       <section class="result">
         <h2 class="result-title">Short URL</h2>
 
         <div class="result-row">
           <a
             class="short-url"
-            [href]="result.short_url"
+            [href]="result()!.short_url"
             target="_blank"
             rel="noopener noreferrer"
           >
-            {{ result.short_url }}
+            {{ result()!.short_url }}
           </a>
 
-          <button type="button" class="btn btn-secondary" (click)="copyShortUrl()">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="copyShortUrl()"
+          >
             Copy
           </button>
         </div>
@@ -65,7 +70,7 @@
           <div>
             <div class="meta-label">Original</div>
             <div class="meta-value original-url">
-              {{ result.original_url }}
+              {{ result()!.original_url }}
             </div>
           </div>
         </div>
@@ -76,4 +81,10 @@
   <footer class="footer">
     Frontend: Angular · API: FastAPI
   </footer>
+
+  @if (toastMessage()) {
+    <div class="toast">
+      {{ toastMessage() }}
+    </div>
+  }
 </div>

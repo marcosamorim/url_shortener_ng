@@ -3,7 +3,8 @@
   min-height: 100vh;
   background: radial-gradient(circle at top, #1f2933, #020617);
   color: #e5e7eb;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
 }
 
 .page {
@@ -245,6 +246,40 @@
   font-size: 0.75rem;
   color: #6b7280;
   text-align: center;
+}
+
+/* Toast */
+
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(56, 189, 248, 0.95);
+  color: #0f172a;
+  padding: 0.7rem 1rem;
+  border-radius: 0.55rem;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);
+  animation: fadeInOut 2s ease forwards;
+  z-index: 2000;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
 }
 
 /* Responsive */
