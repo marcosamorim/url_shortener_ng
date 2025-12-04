@@ -218,43 +218,50 @@ button:disabled {
   font-size: 0.95rem;
 }
 
-/* QR container */
-.qr-wrapper {
-  flex: 0 0 auto;
+/* ---- FULL CARD ---- */
+.qr-card {
+  background: #ffffff;
+  padding: 0.6rem 0.6rem 0.8rem;  /* reduced padding */
+  border-radius: 1rem;
+  border: 3px solid #38e0b9;
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.6rem;
-  padding: 1rem;
-  border-radius: 1rem;
-  background: #020617;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+
+  width: auto;                   /* shrink to content */
+  max-width: 230px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
 
-/* Label above QR */
-.qr-url-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #e5e7eb;
+/* ---- URL TEXT ---- */
+.qr-url {
+  width: 100%;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.3rem;         /* smaller margin */
+  padding: 0.6rem 0.2rem 0;
   word-break: break-all;
-  margin-bottom: 0.2rem;
 }
 
-/* QR inner wrapper for overlay */
-.qr-inner {
+/* ---- QR WRAPPER ---- */
+.qr-code-wrapper {
   position: relative;
-  display: inline-block;
-  line-height: 0;
-}
-
-.qr-inner qrcode canvas,
-.qr-inner qrcode img {
-  display: block;
+  background: #ffffff;
+  padding: 0.25rem;              /* reduced padding */
   border-radius: 0.6rem;
 }
 
-/* LOGO overlay container */
+/* QR image still rounded */
+.qr-code-wrapper qrcode canvas,
+.qr-code-wrapper qrcode img {
+  display: block;
+  border-radius: 0.4rem;
+}
+
+/* ---- CENTER LOGO ---- */
 .qr-logo {
   position: absolute;
   top: 50%;
@@ -263,21 +270,28 @@ button:disabled {
   pointer-events: none;
 }
 
-/* Actual logo box */
 .qr-logo-inner {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 40px;                   /* slightly smaller */
+  height: 40px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #60a5fa, #a855f7);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  color: white;
   font-weight: 700;
-  color: #f8fafc;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  font-size: 0.8rem;
+
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
+
+/*!* ---- CAPTION ---- *!*/
+/*.qr-caption {*/
+/*  margin-top: 0.3rem;*/
+/*  text-align: center;*/
+/*  font-size: 0.75rem;*/
+/*  color: #cbd5e1;*/
+/*}*/
 
 /* -------------------------------------------------------
    FOOTER
