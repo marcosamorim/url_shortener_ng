@@ -79,11 +79,21 @@
           </div>
 
           <div class="qr-wrapper">
-            <qrcode
-              [qrdata]="result()!.short_url"
-              [width]="140"
-              [errorCorrectionLevel]="'M'"
-            ></qrcode>
+            <div class="qr-url-label">{{ result()!.short_url }}</div>
+
+            <div class="qr-inner">
+              <qrcode
+                [qrdata]="result()!.short_url"
+                [width]="180"
+                [errorCorrectionLevel]="'H'"
+              ></qrcode>
+
+              <!-- rdrt logo overlay -->
+              <div class="qr-logo">
+                <div class="qr-logo-inner">rdrt</div>
+              </div>
+            </div>
+
             <div class="qr-caption">Scan to open</div>
           </div>
         </div>
