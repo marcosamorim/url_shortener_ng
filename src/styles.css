@@ -1,1 +1,19 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global reset */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Make sure there's no white background around the Angular app */
+body {
+  background-color: #020617; /* same dark tone as your gradient */
+}
+
+/* Optional but nice */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
