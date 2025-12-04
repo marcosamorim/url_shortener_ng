@@ -26,6 +26,12 @@ export class App {
 
   toastMessage = signal<string | null>(null);
 
+  showQr = signal(false);
+
+  toggleQr() {
+    this.showQr.update((v) => !v);
+  }
+
   apiBaseUrl = environment.apiBaseUrl;
 
   constructor(
@@ -56,6 +62,7 @@ export class App {
     this.error.set(null);
     this.result.set(null);
     this.isLoading.set(true);
+    this.showQr.set(false);
     this.cdr.detectChanges();
 
     this.urlShortener.shorten(normalisedUrl).subscribe({
@@ -111,6 +118,14 @@ export class App {
     } catch {
       return 'Please enter a valid URL.';
     }
+  }
+
+  get shortUrlLabel(): string | null {
+    const url = this.result()?.short_url;
+
+    if (!url) return null;
+
+    return url.replace(/^https?:\/\//, "");
   }
 
   async copyShortUrl() {
