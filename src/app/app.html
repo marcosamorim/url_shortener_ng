@@ -1,63 +1,79 @@
-<main class="app">
-  <section class="card">
-    <h1 class="title">{{ title }}</h1>
-<!--    <p class="subtitle">-->
-<!--      Backend:-->
-<!--      <code>{{ apiBaseUrl }}</code>-->
-<!--    </p>-->
-
-    <form class="form" (ngSubmit)="onSubmit()">
-      <input
-        type="url"
-        name="url"
-        [(ngModel)]="url"
-        required
-        placeholder="https://www.example.com"
-        class="input"
-      />
-      <button type="submit" [disabled]="isLoading" class="button">
-        {{ isLoading ? 'Shortening…' : 'Shorten' }}
-      </button>
-    </form>
-
-    <p *ngIf="error" class="error">
-      {{ error }}
+<div class="page">
+  <header class="header">
+    <div class="logo">rdrt</div>
+    <h1 class="title">URL Shortener</h1>
+    <p class="subtitle">
+      Paste a long URL, get a short one.
     </p>
+  </header>
 
-    <div *ngIf="result" class="result">
-      <div class="row">
-        <span class="label">Original:</span>
-        <a
-          class="value link"
-          [href]="result.original_url"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {{ result.original_url }}
-        </a>
-      </div>
+  <main class="card">
+    <form class="form" (submit)="onSubmit()">
+      <label for="url" class="label">Long URL</label>
 
-      <div class="row">
-        <span class="label">Short:</span>
-        <a
-          class="value link"
-          [href]="result.short_url"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {{ result.short_url }}
-        </a>
-      </div>
+      <div class="input-row">
+        <input
+          id="url"
+          name="url"
+          type="text"
+          [(ngModel)]="url"
+          placeholder="https://example.com/very/long/link"
+          class="input"
+          [class.input-error]="error"
+          autocomplete="off"
+        />
 
-      <div class="actions">
         <button
-          type="button"
-          class="button button-secondary"
-          (click)="copyShortUrl()"
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading || !url"
         >
-          Copy
+          @if (!isLoading) {
+            Shorten
+          } @else {
+            <span class="spinner"></span>
+          }
         </button>
       </div>
-    </div>
-  </section>
-</main>
+
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
+    </form>
+
+    <!-- RESULT SECTION -->
+    @if (result) {
+      <section class="result">
+        <h2 class="result-title">Short URL</h2>
+
+        <div class="result-row">
+          <a
+            class="short-url"
+            [href]="result.short_url"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ result.short_url }}
+          </a>
+
+          <button type="button" class="btn btn-secondary" (click)="copyShortUrl()">
+            Copy
+          </button>
+        </div>
+
+        <div class="meta">
+          <div>
+            <div class="meta-label">Original</div>
+            <div class="meta-value original-url">
+              {{ result.original_url }}
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+  </main>
+
+  <footer class="footer">
+    Frontend: Angular · API: FastAPI
+  </footer>
+</div>
