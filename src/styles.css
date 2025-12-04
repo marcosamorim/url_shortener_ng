@@ -9,6 +9,8 @@ body {
 /* Make sure there's no white background around the Angular app */
 body {
   background-color: #020617; /* same dark tone as your gradient */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* Optional but nice */

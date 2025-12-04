@@ -47,31 +47,44 @@
       <section class="result">
         <h2 class="result-title">Short URL</h2>
 
-        <div class="result-row">
-          <a
-            class="short-url"
-            [href]="result()!.short_url"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {{ result()!.short_url }}
-          </a>
+        <div class="result-main">
+          <div class="result-text">
+            <div class="result-row">
+              <a
+                class="short-url"
+                [href]="result()!.short_url"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {{ result()!.short_url }}
+              </a>
 
-          <button
-            type="button"
-            class="btn btn-secondary"
-            (click)="copyShortUrl()"
-          >
-            Copy
-          </button>
-        </div>
-
-        <div class="meta">
-          <div>
-            <div class="meta-label">Original</div>
-            <div class="meta-value original-url">
-              {{ result()!.original_url }}
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="copyShortUrl()"
+              >
+                Copy
+              </button>
             </div>
+
+            <div class="meta">
+              <div>
+                <div class="meta-label">Original</div>
+                <div class="meta-value original-url">
+                  {{ result()!.original_url }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="qr-wrapper">
+            <qrcode
+              [qrdata]="result()!.short_url"
+              [width]="140"
+              [errorCorrectionLevel]="'M'"
+            ></qrcode>
+            <div class="qr-caption">Scan to open</div>
           </div>
         </div>
       </section>

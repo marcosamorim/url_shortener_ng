@@ -6,11 +6,12 @@ import {
   ShortenResponse,
 } from './services/url-shortener.service';
 import { environment } from '../environments/environment';
+import { QRCodeComponent } from 'angularx-qrcode';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, QRCodeComponent],
   templateUrl: './app.html',
   styleUrls: ['./app.css'],
 })
@@ -79,7 +80,6 @@ export class App {
    * Adds https:// if the user didn't type a scheme.
    */
   private normaliseUrl(raw: string): string {
-    // generic "scheme://" check
     const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(raw);
     if (!hasScheme) {
       return 'https://' + raw;
@@ -103,7 +103,6 @@ export class App {
         return 'Please enter a valid domain.';
       }
 
-      // Optional: require at least one dot (reject "https://test")
       if (!parsed.hostname.includes('.')) {
         return 'Please enter a full domain (e.g. example.com).';
       }
