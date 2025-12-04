@@ -285,13 +285,9 @@ button:disabled {
   box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 
-/*!* ---- CAPTION ---- *!*/
-/*.qr-caption {*/
-/*  margin-top: 0.3rem;*/
-/*  text-align: center;*/
-/*  font-size: 0.75rem;*/
-/*  color: #cbd5e1;*/
-/*}*/
+.qr-download-btn {
+  margin-top: 0.5rem;
+}
 
 /* -------------------------------------------------------
    FOOTER

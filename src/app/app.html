@@ -91,10 +91,8 @@
           </div>
 
           @if (showQr()) {
-            <div class="qr-card">
-              <div class="qr-url">
-                {{ shortUrlLabel }}
-              </div>
+            <div class="qr-card" #qrCard>
+              <div class="qr-url">{{ shortUrlLabel }}</div>
 
               <div class="qr-code-wrapper">
                 <qrcode
@@ -108,6 +106,14 @@
                 </div>
               </div>
             </div>
+
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm qr-download-btn"
+              (click)="downloadQrCard()"
+            >
+              Download card
+            </button>
           }
         </div>
       </section>

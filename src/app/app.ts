@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, ChangeDetectorRef, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -6,7 +6,10 @@ import {
   ShortenResponse,
 } from './services/url-shortener.service';
 import { environment } from '../environments/environment';
+
 import { QRCodeComponent } from 'angularx-qrcode';
+import html2canvas from 'html2canvas';
+
 
 @Component({
   selector: 'app-root',
@@ -31,6 +34,8 @@ export class App {
   toggleQr() {
     this.showQr.update((v) => !v);
   }
+
+  @ViewChild('qrCard') qrCardRef?: ElementRef<HTMLDivElement>;
 
   apiBaseUrl = environment.apiBaseUrl;
 
@@ -147,5 +152,39 @@ export class App {
       this.toastMessage.set(null);
       this.cdr.detectChanges();
     }, 2000);
+  }
+
+  async downloadQrCard() {
+    if (!this.qrCardRef) {
+      this.showToast('QR card not ready');
+      return;
+    }
+
+    const element = this.qrCardRef.nativeElement;
+
+    try {
+      // Higher scale = higher resolution export
+      const canvas = await html2canvas(element, {
+        scale: 3,              // 3x device resolution
+        backgroundColor: null, // keep transparency around the card
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+
+      // Build a reasonable filename from the short url
+      const short = this.result()?.short_url ?? 'rdrt-link';
+      const slug = short.replace(/^https?:\/\//, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `qr-${slug}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      this.showToast('QR card downloaded');
+    } catch (e) {
+      this.showToast('Failed to download QR card');
+    }
   }
 }
