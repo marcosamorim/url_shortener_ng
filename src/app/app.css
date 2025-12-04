@@ -353,3 +353,48 @@ button:disabled {
     transform: translateY(-10px);
   }
 }
+
+/* ---------- MOBILE LAYOUT TWEAKS ---------- */
+@media (max-width: 768px) {
+  /* Overall page padding – avoid giant gutters on phones */
+  .page-wrapper,
+  .app-shell,
+  body {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* The block that holds "SHORT URL + original" + QR.
+     Whatever you called it (you had .result-main earlier),
+     force it to stack vertical on phones. */
+  .result-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+  }
+
+  /* Short URL + buttons row */
+  .result-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .result-row .short-url {
+    flex: 1 1 100%;
+    word-break: break-all;
+  }
+
+  /* Make the buttons wrap under the link and look good */
+  .result-row .btn {
+    flex: 1 1 auto;
+    min-width: 120px;
+    justify-content: center;
+  }
+
+  /* QR container: remove desktop left offset */
+  .qr-container {
+    margin-left: 0;
+    margin-top: 0.5rem;
+    align-self: center;
+  }
+}
