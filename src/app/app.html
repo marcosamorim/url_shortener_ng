@@ -2,13 +2,96 @@
   <header class="header">
     <div class="logo">rdrt</div>
     <h1 class="title">URL Shortener</h1>
-    <p class="subtitle">
-      Paste a long URL, get a short one.
-    </p>
+    <p class="subtitle">Paste a long URL, get a short one.</p>
   </header>
 
   <main class="card">
-    <form class="form" (submit)="onSubmit()">
+    <!-- OPTIONAL LOGIN -->
+    <section class="auth">
+      <div class="auth-head">
+        <div class="auth-title">Sign in (optional)</div>
+
+        @if (isLoggedIn()) {
+          <div class="auth-status auth-status-on">Signed in</div>
+        } @else {
+          <div class="auth-status auth-status-off">Not signed in</div>
+        }
+      </div>
+
+      <p class="auth-hint">
+        If you sign in, your links can be tied to your user for private stats later. Otherwise, you can still shorten URLs normally.
+      </p>
+
+      @if (!isLoggedIn()) {
+        <form class="auth-form" (submit)="login()">
+          <div class="auth-row">
+            <div class="auth-field">
+              <label class="label" for="email">Email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                [(ngModel)]="email"
+                class="input"
+                autocomplete="email"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div class="auth-field">
+              <label class="label" for="password">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                [(ngModel)]="password"
+                class="input"
+                autocomplete="current-password"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+
+          <div class="auth-row">
+            <div class="auth-field">
+              <label class="label" for="clientId">Client ID</label>
+              <input
+                id="clientId"
+                name="clientId"
+                type="text"
+                [(ngModel)]="clientId"
+                class="input"
+                autocomplete="off"
+                placeholder="angular-web"
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-secondary"
+              [disabled]="isLoading() || !email.trim() || !password"
+            >
+              @if (!isLoading()) {
+                Sign in
+              } @else {
+                <span class="spinner"></span>
+              }
+            </button>
+          </div>
+        </form>
+      } @else {
+        <div class="auth-actions">
+          <button type="button" class="btn btn-secondary" (click)="logout()">
+            Sign out
+          </button>
+        </div>
+      }
+    </section>
+
+    <hr class="divider" />
+
+    <!-- SHORTEN FORM (ALWAYS AVAILABLE) -->
+    <form class="form" (ngSubmit)="onSubmit()">
       <label for="url" class="label">Long URL</label>
 
       <div class="input-row">
@@ -23,11 +106,7 @@
           autocomplete="off"
         />
 
-        <button
-          type="submit"
-          class="btn btn-primary"
-          [disabled]="isLoading() || !url"
-        >
+        <button type="submit" class="btn btn-primary" [disabled]="isLoading() || !url">
           @if (!isLoading()) {
             Shorten
           } @else {
@@ -37,9 +116,7 @@
       </div>
 
       @if (error()) {
-        <p class="error">
-          {{ error() }}
-        </p>
+        <p class="error">{{ error() }}</p>
       }
     </form>
 
@@ -59,33 +136,19 @@
                 {{ result()!.short_url }}
               </a>
 
-              <button
-                type="button"
-                class="btn btn-secondary"
-                (click)="copyShortUrl()"
-              >
+              <button type="button" class="btn btn-secondary" (click)="copyShortUrl()">
                 Copy
               </button>
 
-              <button
-                type="button"
-                class="btn btn-secondary"
-                (click)="toggleQr()"
-              >
-                @if (showQr()) {
-                  Hide QR
-                } @else {
-                  Show QR
-                }
+              <button type="button" class="btn btn-secondary" (click)="toggleQr()">
+                @if (showQr()) { Hide QR } @else { Show QR }
               </button>
             </div>
 
             <div class="meta">
               <div>
                 <div class="meta-label">Original</div>
-                <div class="meta-value original-url">
-                  {{ result()!.original_url }}
-                </div>
+                <div class="meta-value original-url">{{ result()!.original_url }}</div>
               </div>
             </div>
           </div>
@@ -132,13 +195,9 @@
     }
   </main>
 
-  <footer class="footer">
-    Frontend: Angular · API: FastAPI
-  </footer>
+  <footer class="footer">Frontend: Angular · API: FastAPI</footer>
 
   @if (toastMessage()) {
-    <div class="toast">
-      {{ toastMessage() }}
-    </div>
+    <div class="toast">{{ toastMessage() }}</div>
   }
 </div>

@@ -1,13 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import {provideHttpClient} from '@angular/common/http';
 
-import { UrlShortener } from './url-shortener';
+import { UrlShortenerService } from './url-shortener.service';
 
-describe('UrlShortener', () => {
-  let service: UrlShortener;
+describe('UrlShortenerService', () => {
+  let service: UrlShortenerService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(UrlShortener);
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient()],
+    });
+    service = TestBed.inject(UrlShortenerService);
   });
 
   it('should be created', () => {

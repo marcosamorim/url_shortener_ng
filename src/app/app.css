@@ -72,6 +72,85 @@
 }
 
 /* -------------------------------------------------------
+   OPTIONAL AUTH SECTION
+-------------------------------------------------------- */
+
+.auth {
+  margin-bottom: 1rem;
+}
+
+.auth-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.auth-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.auth-status {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  white-space: nowrap;
+}
+
+.auth-status-on {
+  border-color: rgba(56, 224, 185, 0.55);
+  background: rgba(56, 224, 185, 0.12);
+  color: #a7f3d0;
+}
+
+.auth-status-off {
+  border-color: rgba(148, 163, 184, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.auth-hint {
+  margin: 0.5rem 0 0.9rem;
+  opacity: 0.75;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.auth-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.auth-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.auth-actions {
+  margin-top: 0.75rem;
+}
+
+.divider {
+  border: 0;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.16);
+  margin: 1rem 0 1.25rem;
+}
+
+/* -------------------------------------------------------
    FORM
 -------------------------------------------------------- */
 
@@ -221,7 +300,7 @@ button:disabled {
 /* ---- FULL CARD ---- */
 .qr-card {
   background: #ffffff;
-  padding: 0.6rem 0.6rem 0.8rem;  /* reduced padding */
+  padding: 0.6rem 0.6rem 0.8rem; /* reduced padding */
   border-radius: 1rem;
   border: 3px solid #38e0b9;
 
@@ -229,9 +308,9 @@ button:disabled {
   flex-direction: column;
   align-items: center;
 
-  width: auto;                   /* shrink to content */
+  width: auto; /* shrink to content */
   max-width: 230px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 /* ---- URL TEXT ---- */
@@ -241,7 +320,7 @@ button:disabled {
   font-size: 1rem;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 0.3rem;         /* smaller margin */
+  margin-bottom: 0.3rem; /* smaller margin */
   padding: 0.6rem 0.2rem 0;
   word-break: break-all;
 }
@@ -250,7 +329,7 @@ button:disabled {
 .qr-code-wrapper {
   position: relative;
   background: #ffffff;
-  padding: 0.25rem;              /* reduced padding */
+  padding: 0.25rem; /* reduced padding */
   border-radius: 0.6rem;
 }
 
@@ -271,7 +350,7 @@ button:disabled {
 }
 
 .qr-logo-inner {
-  width: 40px;                   /* slightly smaller */
+  width: 40px; /* slightly smaller */
   height: 40px;
   border-radius: 12px;
   background: linear-gradient(135deg, #60a5fa, #a855f7);
@@ -282,12 +361,8 @@ button:disabled {
   font-weight: 700;
   font-size: 0.8rem;
 
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
-
-/*.qr-download-btn {*/
-/*  margin-top: 0.5rem;*/
-/*}*/
 
 .qr-container {
   display: flex;
@@ -356,13 +431,6 @@ button:disabled {
 
 /* ---------- MOBILE LAYOUT TWEAKS ---------- */
 @media (max-width: 768px) {
-  /* Overall page padding – avoid giant gutters on phones */
-  .page-wrapper,
-  .app-shell,
-  body {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-  }
   /* Row that contains the LONG URL input + Shorten button */
   .input-row {
     display: flex;
@@ -376,12 +444,19 @@ button:disabled {
     width: 100%;
   }
 
-  .input-row .btn-primary {
-    justify-content: center; /* if your button is flex */
+  /* Auth rows should stack on mobile */
+  .auth-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
   }
 
-  /* The block that holds "SHORT URL + original" + QR.
-     Force it to stack vertical on phones. */
+  .auth-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Force result block to stack vertical on phones */
   .result-main {
     flex-direction: column;
     align-items: stretch;
@@ -399,7 +474,6 @@ button:disabled {
     word-break: break-all;
   }
 
-  /* Make the buttons wrap under the link and look good */
   .result-row .btn {
     flex: 1 1 auto;
     min-width: 120px;
@@ -413,5 +487,12 @@ button:disabled {
     align-self: center;
   }
 
-}
+  /* Slightly reduce host padding on phones */
+  :host {
+    padding: 1rem;
+  }
 
+  .card {
+    padding: 1.25rem;
+  }
+}
