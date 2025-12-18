@@ -25,7 +25,6 @@ export class App {
   // --- Login form (optional) ---
   email = '';
   password = '';
-  clientId = 'angular-web';
 
   // --- UI state ---
   isLoggedIn = signal(false);
@@ -62,9 +61,8 @@ export class App {
 
     const email = this.email.trim();
     const password = this.password;
-    const clientId = this.clientId.trim() || 'angular-web';
 
-    this.auth.login(email, password, clientId).subscribe({
+    this.auth.login(email, password).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.isLoggedIn.set(true);

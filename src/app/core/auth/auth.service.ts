@@ -18,11 +18,11 @@ export class AuthService {
     private tokenService: TokenService,
   ) {}
 
-  login(email: string, password: string, clientId?: string): Observable<TokenResponse> {
+  login(email: string, password: string): Observable<TokenResponse> {
     const body = new URLSearchParams();
     body.set('username', email);
     body.set('password', password);
-    if (clientId) body.set('client_id', clientId);
+    body.set('client_id', 'angular-web');
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded',
