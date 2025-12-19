@@ -46,6 +46,13 @@
   margin-top: 0.25rem;
 }
 
+.header-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
 /* -------------------------------------------------------
    CARD
 -------------------------------------------------------- */
@@ -72,19 +79,8 @@
 }
 
 /* -------------------------------------------------------
-   OPTIONAL AUTH SECTION
+   AUTH PANEL
 -------------------------------------------------------- */
-
-.auth {
-  margin-bottom: 1rem;
-}
-
-.auth-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
 
 .auth-title {
   font-size: 0.95rem;
@@ -116,22 +112,17 @@
 }
 
 .auth-hint {
-  margin: 0.5rem 0 0.9rem;
-  opacity: 0.75;
-  font-size: 0.95rem;
-  line-height: 1.35;
+  margin-top: 0.35rem;
+  opacity: 0.7;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-}
-
-.auth-row {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-end;
+  margin-top: 1rem;
 }
 
 .auth-field {
@@ -143,11 +134,41 @@
   margin-top: 0.75rem;
 }
 
-.divider {
-  border: 0;
-  height: 1px;
-  background: rgba(148, 163, 184, 0.16);
-  margin: 1rem 0 1.25rem;
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1200;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.auth-panel {
+  width: min(420px, 100%);
+  background: rgba(2, 6, 23, 0.95);
+  padding: 1.75rem;
+  border-left: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: -12px 0 30px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.25s ease;
+}
+
+.auth-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(20px);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* -------------------------------------------------------
@@ -292,6 +313,11 @@ button:disabled {
   margin-bottom: 0.2rem;
 }
 
+.meta-value {
+  font-size: 0.95rem;
+  color: #e2e8f0;
+}
+
 .original-url {
   opacity: 0.8;
   font-size: 0.95rem;
@@ -383,6 +409,79 @@ button:disabled {
 }
 
 /* -------------------------------------------------------
+   MY URLS
+-------------------------------------------------------- */
+
+.my-urls {
+  margin-top: 2rem;
+}
+
+.my-urls-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.my-urls-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.my-urls-meta {
+  font-size: 0.85rem;
+  color: rgba(226, 232, 240, 0.7);
+}
+
+.my-urls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.my-urls-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.my-urls-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.my-urls-original {
+  font-size: 0.9rem;
+  color: rgba(226, 232, 240, 0.7);
+  word-break: break-word;
+  margin-top: 0.25rem;
+}
+
+.my-urls-stats {
+  display: flex;
+  gap: 1.5rem;
+  min-width: 180px;
+}
+
+.my-urls-empty {
+  margin-top: 0.75rem;
+  color: rgba(226, 232, 240, 0.7);
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* -------------------------------------------------------
    FOOTER
 -------------------------------------------------------- */
 
@@ -444,16 +543,9 @@ button:disabled {
     width: 100%;
   }
 
-  /* Auth rows should stack on mobile */
-  .auth-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-
-  .auth-row .btn {
+  .auth-panel {
     width: 100%;
-    justify-content: center;
+    border-left: none;
   }
 
   /* Force result block to stack vertical on phones */
@@ -485,6 +577,20 @@ button:disabled {
     margin-left: 0;
     margin-top: 0.25rem;
     align-self: center;
+  }
+
+  .my-urls-item {
+    flex-direction: column;
+  }
+
+  .my-urls-stats {
+    min-width: 0;
+  }
+
+  .my-urls-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
   }
 
   /* Slightly reduce host padding on phones */

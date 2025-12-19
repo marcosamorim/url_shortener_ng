@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { QRCodeComponent } from 'angularx-qrcode';
 import html2canvas from 'html2canvas';
 
-import { UrlShortenerService, ShortenResponse } from './services/url-shortener.service';
+import { UrlShortenerService, ShortenResponse, MyUrlItem } from './services/url-shortener.service';
 import { AuthService } from './core/auth/auth.service';
 import { TokenService } from './services/token.service';
 
@@ -28,10 +28,20 @@ export class App {
 
   // --- UI state ---
   isLoggedIn = signal(false);
+  isAuthOpen = signal(false);
+  authLoading = signal(false);
+  authError = signal<string | null>(null);
 
   isLoading = signal(false);
   error = signal<string | null>(null);
   result = signal<ShortenResponse | null>(null);
+  myUrls = signal<MyUrlItem[]>([]);
+  myUrlsTotal = signal(0);
+  myUrlsPage = signal(1);
+  myUrlsPageSize = 5;
+  myUrlsLoading = signal(false);
+  myUrlsError = signal<string | null>(null);
+  myUrlsOpen = signal(true);
 
   toastMessage = signal<string | null>(null);
 
@@ -49,30 +59,36 @@ export class App {
     private cdr: ChangeDetectorRef,
   ) {
     // Initial state
-    this.isLoggedIn.set(!!this.tokenService.token());
+    const hasToken = !!this.tokenService.token();
+    this.isLoggedIn.set(hasToken);
+    if (hasToken) {
+      this.loadMyUrls(1);
+    }
   }
 
   // -------------------------
   // Auth (optional)
   // -------------------------
   login() {
-    this.error.set(null);
-    this.isLoading.set(true);
+    this.authError.set(null);
+    this.authLoading.set(true);
 
     const email = this.email.trim();
     const password = this.password;
 
     this.auth.login(email, password).subscribe({
       next: () => {
-        this.isLoading.set(false);
+        this.authLoading.set(false);
         this.isLoggedIn.set(true);
+        this.isAuthOpen.set(false);
+        this.loadMyUrls(1);
         this.showToast('Logged in');
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.isLoading.set(false);
+        this.authLoading.set(false);
         const msg = err?.error?.detail || err?.message || 'Login failed';
-        this.error.set(msg);
+        this.authError.set(msg);
         this.cdr.detectChanges();
       },
     });
@@ -82,8 +98,77 @@ export class App {
   logout() {
     this.tokenService.clear();
     this.isLoggedIn.set(false);
+    this.myUrls.set([]);
+    this.myUrlsTotal.set(0);
+    this.myUrlsPage.set(1);
     this.showToast('Logged out');
     this.cdr.detectChanges();
+  }
+
+  openAuth() {
+    this.authError.set(null);
+    this.isAuthOpen.set(true);
+  }
+
+  closeAuth() {
+    this.isAuthOpen.set(false);
+  }
+
+  loadMyUrls(page: number) {
+    this.myUrlsLoading.set(true);
+    this.myUrlsError.set(null);
+    this.myUrlsPage.set(page);
+
+    this.urlShortener.myUrls(page, this.myUrlsPageSize).subscribe({
+      next: (res) => {
+        this.myUrls.set(res.items);
+        this.myUrlsTotal.set(res.total);
+        this.myUrlsLoading.set(false);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.myUrlsLoading.set(false);
+        const msg =
+          err?.error?.detail ||
+          err?.message ||
+          'Failed to load your URLs. Please try again.';
+        this.myUrlsError.set(msg);
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  refreshMyUrls() {
+    this.loadMyUrls(this.myUrlsPage());
+  }
+
+  toggleMyUrls() {
+    this.myUrlsOpen.update((value) => !value);
+  }
+
+  get myUrlsTotalPages(): number {
+    return Math.max(1, Math.ceil(this.myUrlsTotal() / this.myUrlsPageSize));
+  }
+
+  nextMyUrlsPage() {
+    const next = this.myUrlsPage() + 1;
+    if (next <= this.myUrlsTotalPages) {
+      this.loadMyUrls(next);
+    }
+  }
+
+  prevMyUrlsPage() {
+    const prev = this.myUrlsPage() - 1;
+    if (prev >= 1) {
+      this.loadMyUrls(prev);
+    }
+  }
+
+  formatDate(value: string | undefined): string {
+    if (!value) return '';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleString();
   }
 
   // -------------------------
@@ -119,6 +204,9 @@ export class App {
       next: (res) => {
         this.result.set(res);
         this.isLoading.set(false);
+        if (this.isLoggedIn()) {
+          this.loadMyUrls(1);
+        }
         this.cdr.detectChanges();
       },
       error: (err) => {

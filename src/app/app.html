@@ -3,78 +3,20 @@
     <div class="logo">rdrt</div>
     <h1 class="title">URL Shortener</h1>
     <p class="subtitle">Paste a long URL, get a short one.</p>
+    <div class="header-actions">
+      @if (isLoggedIn()) {
+        <button type="button" class="btn btn-secondary" (click)="openAuth()">
+          Account
+        </button>
+      } @else {
+        <button type="button" class="btn btn-secondary" (click)="openAuth()">
+          Sign in
+        </button>
+      }
+    </div>
   </header>
 
   <main class="card">
-    <!-- OPTIONAL LOGIN -->
-    <section class="auth">
-      <div class="auth-head">
-        <div class="auth-title">Sign in (optional)</div>
-
-        @if (isLoggedIn()) {
-          <div class="auth-status auth-status-on">Signed in</div>
-        } @else {
-          <div class="auth-status auth-status-off">Not signed in</div>
-        }
-      </div>
-
-      <p class="auth-hint">
-        If you sign in, your links can be tied to your user for private stats later. Otherwise, you can still shorten URLs normally.
-      </p>
-
-      @if (!isLoggedIn()) {
-        <form class="auth-form" (submit)="login()">
-          <div class="auth-row">
-            <div class="auth-field">
-              <label class="label" for="email">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                [(ngModel)]="email"
-                class="input"
-                autocomplete="email"
-                placeholder="you@example.com"
-              />
-            </div>
-
-            <div class="auth-field">
-              <label class="label" for="password">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                [(ngModel)]="password"
-                class="input"
-                autocomplete="current-password"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <button
-              type="submit"
-              class="btn btn-secondary"
-              [disabled]="isLoading() || !email.trim() || !password"
-            >
-              @if (!isLoading()) {
-                Sign in
-              } @else {
-                <span class="spinner"></span>
-              }
-            </button>
-          </div>
-        </form>
-      } @else {
-        <div class="auth-actions">
-          <button type="button" class="btn btn-secondary" (click)="logout()">
-            Sign out
-          </button>
-        </div>
-      }
-    </section>
-
-    <hr class="divider" />
-
     <!-- SHORTEN FORM (ALWAYS AVAILABLE) -->
     <form class="form" (ngSubmit)="onSubmit()">
       <label for="url" class="label">Long URL</label>
@@ -178,9 +120,154 @@
         </div>
       </section>
     }
+
+    @if (isLoggedIn()) {
+      <section class="my-urls">
+        <div class="my-urls-head">
+          <h2 class="result-title">My URLs</h2>
+          <div class="my-urls-actions">
+            <div class="my-urls-meta">
+              Page {{ myUrlsPage() }} / {{ myUrlsTotalPages }}
+            </div>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="refreshMyUrls()"
+              [disabled]="myUrlsLoading()"
+            >
+              Refresh
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="toggleMyUrls()">
+              @if (myUrlsOpen()) { Collapse } @else { Expand }
+            </button>
+          </div>
+        </div>
+
+        @if (myUrlsOpen()) {
+          @if (myUrlsLoading()) {
+            <div class="my-urls-empty">Loading your URLs...</div>
+          } @else if (myUrlsError()) {
+            <div class="error">{{ myUrlsError() }}</div>
+          } @else if (!myUrls().length) {
+            <div class="my-urls-empty">No links yet. Create your first short URL above.</div>
+          } @else {
+            <div class="my-urls-list">
+              @for (item of myUrls(); track item.code) {
+                <div class="my-urls-item">
+                  <div class="my-urls-main">
+                    <a class="short-url" [href]="item.short_url" target="_blank" rel="noopener">
+                      {{ item.short_url }}
+                    </a>
+                    <div class="my-urls-original">{{ item.original_url }}</div>
+                  </div>
+                  <div class="my-urls-stats">
+                    <div>
+                      <div class="meta-label">Clicks</div>
+                      <div class="meta-value">{{ item.clicks }}</div>
+                    </div>
+                    <div>
+                      <div class="meta-label">Created</div>
+                      <div class="meta-value">{{ formatDate(item.created_at) }}</div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="pagination">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="prevMyUrlsPage()"
+                [disabled]="myUrlsPage() <= 1"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="nextMyUrlsPage()"
+                [disabled]="myUrlsPage() >= myUrlsTotalPages"
+              >
+                Next
+              </button>
+            </div>
+          }
+        }
+      </section>
+    }
   </main>
 
   <footer class="footer">Frontend: Angular · API: FastAPI</footer>
+
+  @if (isAuthOpen()) {
+    <div class="auth-overlay" (click)="closeAuth()">
+      <aside class="auth-panel" (click)="$event.stopPropagation()">
+        <div class="auth-panel-header">
+          <div>
+            <div class="auth-title">Sign in (optional)</div>
+            <div class="auth-hint">
+              Sign in to tie links to your account and see private stats later.
+            </div>
+          </div>
+          <button type="button" class="btn btn-secondary" (click)="closeAuth()">Close</button>
+        </div>
+
+        @if (!isLoggedIn()) {
+          <form class="auth-form" (submit)="login()">
+            <div class="auth-field">
+              <label class="label" for="email">Email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                [(ngModel)]="email"
+                class="input"
+                autocomplete="email"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div class="auth-field">
+              <label class="label" for="password">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                [(ngModel)]="password"
+                class="input"
+                autocomplete="current-password"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="authLoading() || !email.trim() || !password"
+            >
+              @if (!authLoading()) {
+                Sign in
+              } @else {
+                <span class="spinner"></span>
+              }
+            </button>
+
+            @if (authError()) {
+              <p class="error">{{ authError() }}</p>
+            }
+          </form>
+        } @else {
+          <div class="auth-status auth-status-on">Signed in</div>
+          <div class="auth-actions">
+            <button type="button" class="btn btn-secondary" (click)="logout()">
+              Sign out
+            </button>
+          </div>
+        }
+      </aside>
+    </div>
+  }
 
   @if (toastMessage()) {
     <div class="toast">{{ toastMessage() }}</div>

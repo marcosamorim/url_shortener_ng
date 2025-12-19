@@ -26,6 +26,21 @@ export interface StatsPrivate extends StatsPublic {
   extras?: Record<string, unknown> | null;
 }
 
+export interface MyUrlItem {
+  code: string;
+  short_url: string;
+  original_url: string;
+  clicks: number;
+  created_at: string;
+}
+
+export interface MyUrlsResponse {
+  items: MyUrlItem[];
+  page: number;
+  page_size: number;
+  total: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UrlShortenerService {
   private readonly apiBaseUrl = environment.SHORTENER_API_BASE_URL;
@@ -40,6 +55,12 @@ export class UrlShortenerService {
     return this.http.get<StatsPublic | StatsPrivate>(`${this.apiBaseUrl}/api/stats/${code}`, {
       headers: this.authHeadersIfAny(),
     });
+  }
+
+  myUrls(page = 1, pageSize = 10): Observable<MyUrlsResponse> {
+    return this.http.get<MyUrlsResponse>(
+      `${this.apiBaseUrl}/api/me/urls?page=${page}&page_size=${pageSize}`,
+    );
   }
 
   private authHeadersIfAny(): HttpHeaders | undefined {
