@@ -44,7 +44,7 @@ export class App {
   myUrlsPageSize = 5;
   myUrlsLoading = signal(false);
   myUrlsError = signal<string | null>(null);
-  myUrlsOpen = signal(true);
+  myUrlsOpen = signal(false);
 
   toastMessage = signal<string | null>(null);
 

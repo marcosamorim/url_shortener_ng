@@ -5,16 +5,12 @@
     <p class="subtitle">Paste a long URL, get a short one.</p>
     <div class="header-actions">
       @if (isLoggedIn()) {
-        <div class="status-pill status-on">Signed in</div>
-      } @else {
-        <div class="status-pill status-off">Guest mode</div>
-      }
-      @if (isLoggedIn()) {
-        <button type="button" class="btn btn-secondary" (click)="openAuth()">
+        <button type="button" class="icon-btn icon-btn-ghost account-btn" (click)="openAuth()">
+          <span class="status-dot"></span>
           Account
         </button>
       } @else {
-        <button type="button" class="btn btn-secondary" (click)="openAuth()">
+        <button type="button" class="icon-btn icon-btn-ghost" (click)="openAuth()">
           Log in
         </button>
       }
@@ -68,12 +64,12 @@
                 {{ result()!.short_url }}
               </a>
 
-              <button type="button" class="btn btn-secondary" (click)="copyShortUrl()">
+              <button type="button" class="icon-btn icon-btn-ghost" (click)="copyShortUrl()">
                 Copy
               </button>
 
-              <button type="button" class="btn btn-secondary" (click)="toggleQr()">
-                @if (showQr()) { Hide QR } @else { Show QR }
+              <button type="button" class="icon-btn icon-btn-ghost" (click)="toggleQr()">
+                @if (showQr()) { QR Off } @else { QR }
               </button>
             </div>
 
@@ -106,7 +102,7 @@
               <div class="qr-actions">
                 <button
                   type="button"
-                  class="btn btn-secondary qr-action-btn"
+                  class="icon-btn icon-btn-ghost qr-action-btn"
                   (click)="downloadQrCard()"
                 >
                   Download card
@@ -114,7 +110,7 @@
 
                 <button
                   type="button"
-                  class="btn btn-secondary qr-action-btn"
+                  class="icon-btn icon-btn-ghost qr-action-btn"
                   (click)="copyQrCardToClipboard()"
                 >
                   Copy card
@@ -129,26 +125,35 @@
     @if (isLoggedIn()) {
       <section class="my-urls">
         <div class="my-urls-head">
-          <h2 class="result-title">My URLs</h2>
           <div class="my-urls-actions">
-            <div class="my-urls-meta">
-              Page {{ myUrlsPage() }} / {{ myUrlsTotalPages }}
+            <div class="my-urls-left">
+              <button type="button" class="icon-btn icon-btn-ghost" (click)="toggleMyUrls()">
+                @if (myUrlsOpen()) { History · Hide } @else { History · Show }
+              </button>
+              @if (myUrlsOpen()) {
+                <button
+                  type="button"
+                  class="icon-btn icon-btn-ghost"
+                  (click)="refreshMyUrls()"
+                  [disabled]="myUrlsLoading()"
+                  aria-label="Refresh history"
+                  title="Refresh"
+                >
+                  ↻
+                </button>
+              }
             </div>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              (click)="refreshMyUrls()"
-              [disabled]="myUrlsLoading()"
-            >
-              Refresh
-            </button>
-            <button type="button" class="btn btn-secondary" (click)="toggleMyUrls()">
-              @if (myUrlsOpen()) { Collapse } @else { Expand }
-            </button>
+            @if (myUrlsOpen()) {
+              <button type="button" class="link-btn my-urls-meta" disabled>
+                Page {{ myUrlsPage() }} / {{ myUrlsTotalPages }}
+              </button>
+            }
           </div>
         </div>
 
         @if (myUrlsOpen()) {
+          <div class="my-urls-title">My History</div>
+
           @if (myUrlsLoading()) {
             <div class="my-urls-empty">Loading your URLs...</div>
           } @else if (myUrlsError()) {
@@ -182,7 +187,7 @@
             <div class="pagination">
               <button
                 type="button"
-                class="btn btn-secondary"
+                class="icon-btn icon-btn-ghost"
                 (click)="prevMyUrlsPage()"
                 [disabled]="myUrlsPage() <= 1"
               >
@@ -190,7 +195,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-secondary"
+                class="icon-btn icon-btn-ghost"
                 (click)="nextMyUrlsPage()"
                 [disabled]="myUrlsPage() >= myUrlsTotalPages"
               >
@@ -227,7 +232,7 @@
           <div class="auth-tabs">
             <button
               type="button"
-              class="auth-tab"
+              class="icon-btn icon-btn-ghost auth-tab"
               [class.auth-tab-active]="!isRegisterMode()"
               (click)="setAuthMode('login')"
             >
@@ -235,7 +240,7 @@
             </button>
             <button
               type="button"
-              class="auth-tab"
+              class="icon-btn icon-btn-ghost auth-tab"
               [class.auth-tab-active]="isRegisterMode()"
               (click)="setAuthMode('register')"
             >
@@ -306,10 +311,13 @@
             }
           </form>
         } @else {
-          <div class="auth-status auth-status-on">Signed in</div>
-          <div class="auth-actions">
-            <button type="button" class="btn btn-secondary" (click)="logout()">
-              Sign out
+          <div class="auth-logged">
+            <div class="auth-logged-badge">
+              <span class="auth-logged-icon">✓</span>
+              Logged in
+            </div>
+            <button type="button" class="icon-btn icon-btn-ghost" (click)="logout()">
+              Log out
             </button>
           </div>
         }
