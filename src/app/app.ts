@@ -26,12 +26,14 @@ export class App {
   // --- Login form (optional) ---
   email = '';
   password = '';
+  confirmPassword = '';
 
   // --- UI state ---
   isLoggedIn = signal(false);
   isAuthOpen = signal(false);
   authLoading = signal(false);
   authError = signal<string | null>(null);
+  authMode = signal<'login' | 'register'>('login');
 
   isLoading = signal(false);
   error = signal<string | null>(null);
@@ -89,6 +91,44 @@ export class App {
     });
   }
 
+  register() {
+    this.authError.set(null);
+    this.authLoading.set(true);
+
+    const email = this.email.trim();
+    const password = this.password;
+
+    if (!email || !password || this.passwordsMismatch()) {
+      this.authLoading.set(false);
+      this.authError.set('Please check your details and try again.');
+      return;
+    }
+
+    this.auth.register(email, password).subscribe({
+      next: () => {
+        this.auth.login(email, password).subscribe({
+          next: () => {
+            this.authLoading.set(false);
+            this.isAuthOpen.set(false);
+            this.syncAuthState(true);
+            this.showToast('Account created');
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.authLoading.set(false);
+            this.authError.set(this.formatError(err, 'Login failed after registration.'));
+            this.cdr.detectChanges();
+          },
+        });
+      },
+      error: (err) => {
+        this.authLoading.set(false);
+        this.authError.set(this.formatError(err, 'Registration failed. Please try again.'));
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
   // Frontend-only logout: just remove token locally
   logout() {
     this.tokenService.clear();
@@ -96,6 +136,8 @@ export class App {
     this.myUrls.set([]);
     this.myUrlsTotal.set(0);
     this.myUrlsPage.set(1);
+    this.result.set(null);
+    this.showQr.set(false);
     this.clearLogoutTimer();
     this.showToast('Logged out');
     this.cdr.detectChanges();
@@ -108,6 +150,26 @@ export class App {
 
   closeAuth() {
     this.isAuthOpen.set(false);
+  }
+
+  setAuthMode(mode: 'login' | 'register') {
+    this.authMode.set(mode);
+    this.authError.set(null);
+    this.confirmPassword = '';
+  }
+
+  isRegisterMode(): boolean {
+    return this.authMode() === 'register';
+  }
+
+  passwordsMismatch(): boolean {
+    return this.isRegisterMode() && !!this.confirmPassword && this.password !== this.confirmPassword;
+  }
+
+  canSubmitAuth(): boolean {
+    if (!this.email.trim() || !this.password) return false;
+    if (this.isRegisterMode() && this.password !== this.confirmPassword) return false;
+    return true;
   }
 
   loadMyUrls(page: number) {
