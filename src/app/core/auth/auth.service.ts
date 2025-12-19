@@ -9,6 +9,12 @@ export interface TokenResponse {
   token_type?: string;
 }
 
+export interface RegisterResponse {
+  id: number;
+  email: string;
+  is_active?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly authBaseUrl = environment.AUTH_API_BASE_URL;
@@ -36,6 +42,13 @@ export class AuthService {
           this.tokenService.set(res.access_token);
         }),
       );
+  }
+
+  register(email: string, password: string): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.authBaseUrl}/auth/register`, {
+      email,
+      password,
+    });
   }
 
   logout() {

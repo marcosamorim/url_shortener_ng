@@ -5,12 +5,17 @@
     <p class="subtitle">Paste a long URL, get a short one.</p>
     <div class="header-actions">
       @if (isLoggedIn()) {
+        <div class="status-pill status-on">Signed in</div>
+      } @else {
+        <div class="status-pill status-off">Guest mode</div>
+      }
+      @if (isLoggedIn()) {
         <button type="button" class="btn btn-secondary" (click)="openAuth()">
           Account
         </button>
       } @else {
         <button type="button" class="btn btn-secondary" (click)="openAuth()">
-          Sign in
+          Log in
         </button>
       }
     </div>
@@ -204,17 +209,41 @@
     <div class="auth-overlay" (click)="closeAuth()">
       <aside class="auth-panel" (click)="$event.stopPropagation()">
         <div class="auth-panel-header">
-          <div>
-            <div class="auth-title">Sign in (optional)</div>
-            <div class="auth-hint">
-              Sign in to tie links to your account and see private stats later.
-            </div>
+          <div class="auth-panel-text">
+            @if (isRegisterMode()) {
+              <div class="auth-title">Create your account</div>
+              <div class="auth-hint">Sign up to keep your links and access private stats.</div>
+            } @else {
+              <div class="auth-title">Welcome back</div>
+              <div class="auth-hint">Log in to tie links to your account or create a new one.</div>
+            }
           </div>
-          <button type="button" class="btn btn-secondary" (click)="closeAuth()">Close</button>
+          <button type="button" class="icon-btn" (click)="closeAuth()" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
         </div>
 
         @if (!isLoggedIn()) {
-          <form class="auth-form" (submit)="login()">
+          <div class="auth-tabs">
+            <button
+              type="button"
+              class="auth-tab"
+              [class.auth-tab-active]="!isRegisterMode()"
+              (click)="setAuthMode('login')"
+            >
+              Log in
+            </button>
+            <button
+              type="button"
+              class="auth-tab"
+              [class.auth-tab-active]="isRegisterMode()"
+              (click)="setAuthMode('register')"
+            >
+              Sign up
+            </button>
+          </div>
+
+          <form class="auth-form" (submit)="isRegisterMode() ? register() : login()">
             <div class="auth-field">
               <label class="label" for="email">Email</label>
               <input
@@ -241,17 +270,36 @@
               />
             </div>
 
+            @if (isRegisterMode()) {
+              <div class="auth-field">
+                <label class="label" for="confirm-password">Confirm password</label>
+                <input
+                  id="confirm-password"
+                  name="confirm-password"
+                  type="password"
+                  [(ngModel)]="confirmPassword"
+                  class="input"
+                  autocomplete="new-password"
+                  placeholder="••••••••"
+                />
+              </div>
+            }
+
             <button
               type="submit"
               class="btn btn-primary"
-              [disabled]="authLoading() || !email.trim() || !password"
+              [disabled]="authLoading() || !canSubmitAuth()"
             >
               @if (!authLoading()) {
-                Sign in
-              } @else {
+              @if (isRegisterMode()) { Sign up } @else { Log in }
+            } @else {
                 <span class="spinner"></span>
               }
             </button>
+
+            @if (passwordsMismatch()) {
+              <p class="error">Passwords do not match.</p>
+            }
 
             @if (authError()) {
               <p class="error">{{ authError() }}</p>
