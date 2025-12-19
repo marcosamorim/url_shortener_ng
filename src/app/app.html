@@ -3,6 +3,11 @@
     <div class="logo">rdrt</div>
     <h1 class="title">URL Shortener</h1>
     <p class="subtitle">Paste a long URL, get a short one.</p>
+    @if (isLoggedIn()) {
+      <div class="status-pill status-on">Signed in</div>
+    } @else {
+      <div class="status-pill status-off">Guest mode</div>
+    }
     <div class="header-actions">
       @if (isLoggedIn()) {
         <button type="button" class="btn btn-secondary" (click)="openAuth()">

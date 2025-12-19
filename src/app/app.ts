@@ -18,6 +18,7 @@ import { TokenService } from './services/token.service';
 })
 export class App {
   title = 'URL Shortener';
+  private logoutTimerId: number | null = null;
 
   // --- Shorten form ---
   url = '';
@@ -59,11 +60,7 @@ export class App {
     private cdr: ChangeDetectorRef,
   ) {
     // Initial state
-    const hasToken = !!this.tokenService.token();
-    this.isLoggedIn.set(hasToken);
-    if (hasToken) {
-      this.loadMyUrls(1);
-    }
+    this.syncAuthState(false);
   }
 
   // -------------------------
@@ -79,16 +76,14 @@ export class App {
     this.auth.login(email, password).subscribe({
       next: () => {
         this.authLoading.set(false);
-        this.isLoggedIn.set(true);
         this.isAuthOpen.set(false);
-        this.loadMyUrls(1);
+        this.syncAuthState(true);
         this.showToast('Logged in');
         this.cdr.detectChanges();
       },
       error: (err) => {
         this.authLoading.set(false);
-        const msg = err?.error?.detail || err?.message || 'Login failed';
-        this.authError.set(msg);
+        this.authError.set(this.formatError(err, 'Auth service is unavailable. Please try again.'));
         this.cdr.detectChanges();
       },
     });
@@ -101,6 +96,7 @@ export class App {
     this.myUrls.set([]);
     this.myUrlsTotal.set(0);
     this.myUrlsPage.set(1);
+    this.clearLogoutTimer();
     this.showToast('Logged out');
     this.cdr.detectChanges();
   }
@@ -115,6 +111,7 @@ export class App {
   }
 
   loadMyUrls(page: number) {
+    if (!this.isLoggedIn()) return;
     this.myUrlsLoading.set(true);
     this.myUrlsError.set(null);
     this.myUrlsPage.set(page);
@@ -128,11 +125,9 @@ export class App {
       },
       error: (err) => {
         this.myUrlsLoading.set(false);
-        const msg =
-          err?.error?.detail ||
-          err?.message ||
-          'Failed to load your URLs. Please try again.';
-        this.myUrlsError.set(msg);
+        this.myUrlsError.set(
+          this.formatError(err, 'Shortener service is unavailable. Please try again.'),
+        );
         this.cdr.detectChanges();
       },
     });
@@ -169,6 +164,62 @@ export class App {
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return value;
     return parsed.toLocaleString();
+  }
+
+  private syncAuthState(showExpiredToast: boolean) {
+    const token = this.tokenService.get();
+    if (!token) {
+      this.isLoggedIn.set(false);
+      this.clearLogoutTimer();
+      return;
+    }
+
+    if (this.tokenService.isExpired()) {
+      this.tokenService.clear();
+      this.isLoggedIn.set(false);
+      this.clearLogoutTimer();
+      if (showExpiredToast) {
+        this.showToast('Session expired');
+      }
+      return;
+    }
+
+    this.isLoggedIn.set(true);
+    this.loadMyUrls(1);
+    this.scheduleLogout();
+  }
+
+  private scheduleLogout() {
+    this.clearLogoutTimer();
+    if (typeof window === 'undefined') return;
+
+    const exp = this.tokenService.getExpiryEpochSeconds();
+    if (!exp) return;
+
+    const delayMs = exp * 1000 - Date.now();
+    if (delayMs <= 0) {
+      this.syncAuthState(true);
+      return;
+    }
+
+    this.logoutTimerId = window.setTimeout(() => {
+      this.syncAuthState(true);
+      this.cdr.detectChanges();
+    }, delayMs);
+  }
+
+  private clearLogoutTimer() {
+    if (this.logoutTimerId === null || typeof window === 'undefined') return;
+    window.clearTimeout(this.logoutTimerId);
+    this.logoutTimerId = null;
+  }
+
+  private formatError(err: unknown, fallback: string): string {
+    const anyErr = err as { status?: number; message?: string; error?: { detail?: string } };
+    if (anyErr?.status === 0) {
+      return fallback;
+    }
+    return anyErr?.error?.detail || anyErr?.message || fallback;
   }
 
   // -------------------------
@@ -211,11 +262,7 @@ export class App {
       },
       error: (err) => {
         this.isLoading.set(false);
-        const msg =
-          err?.error?.detail ||
-          err?.message ||
-          'Failed to shorten URL. Please try again.';
-        this.error.set(msg);
+        this.error.set(this.formatError(err, 'Failed to shorten URL. Please try again.'));
         this.cdr.detectChanges();
       },
     });
