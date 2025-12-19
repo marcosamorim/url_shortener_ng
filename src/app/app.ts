@@ -79,6 +79,8 @@ export class App {
       next: () => {
         this.authLoading.set(false);
         this.isAuthOpen.set(false);
+        this.result.set(null);
+        this.showQr.set(false);
         this.syncAuthState(true);
         this.showToast('Logged in');
         this.cdr.detectChanges();
@@ -110,6 +112,8 @@ export class App {
           next: () => {
             this.authLoading.set(false);
             this.isAuthOpen.set(false);
+            this.result.set(null);
+            this.showQr.set(false);
             this.syncAuthState(true);
             this.showToast('Account created');
             this.cdr.detectChanges();
@@ -138,6 +142,9 @@ export class App {
     this.myUrlsPage.set(1);
     this.result.set(null);
     this.showQr.set(false);
+    this.email = '';
+    this.password = '';
+    this.confirmPassword = '';
     this.clearLogoutTimer();
     this.showToast('Logged out');
     this.cdr.detectChanges();

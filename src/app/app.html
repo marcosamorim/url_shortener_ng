@@ -3,19 +3,19 @@
     <div class="logo">rdrt</div>
     <h1 class="title">URL Shortener</h1>
     <p class="subtitle">Paste a long URL, get a short one.</p>
-    @if (isLoggedIn()) {
-      <div class="status-pill status-on">Signed in</div>
-    } @else {
-      <div class="status-pill status-off">Guest mode</div>
-    }
     <div class="header-actions">
+      @if (isLoggedIn()) {
+        <div class="status-pill status-on">Signed in</div>
+      } @else {
+        <div class="status-pill status-off">Guest mode</div>
+      }
       @if (isLoggedIn()) {
         <button type="button" class="btn btn-secondary" (click)="openAuth()">
           Account
         </button>
       } @else {
         <button type="button" class="btn btn-secondary" (click)="openAuth()">
-          Sign in
+          Log in
         </button>
       }
     </div>
@@ -209,13 +209,18 @@
     <div class="auth-overlay" (click)="closeAuth()">
       <aside class="auth-panel" (click)="$event.stopPropagation()">
         <div class="auth-panel-header">
-          <div>
-            <div class="auth-title">Welcome back</div>
-            <div class="auth-hint">
-              Sign in to tie links to your account or create a new one.
-            </div>
+          <div class="auth-panel-text">
+            @if (isRegisterMode()) {
+              <div class="auth-title">Create your account</div>
+              <div class="auth-hint">Sign up to keep your links and access private stats.</div>
+            } @else {
+              <div class="auth-title">Welcome back</div>
+              <div class="auth-hint">Log in to tie links to your account or create a new one.</div>
+            }
           </div>
-          <button type="button" class="btn btn-secondary" (click)="closeAuth()">Close</button>
+          <button type="button" class="icon-btn" (click)="closeAuth()" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
         </div>
 
         @if (!isLoggedIn()) {
@@ -226,7 +231,7 @@
               [class.auth-tab-active]="!isRegisterMode()"
               (click)="setAuthMode('login')"
             >
-              Sign in
+              Log in
             </button>
             <button
               type="button"
@@ -234,7 +239,7 @@
               [class.auth-tab-active]="isRegisterMode()"
               (click)="setAuthMode('register')"
             >
-              Create account
+              Sign up
             </button>
           </div>
 
@@ -286,8 +291,8 @@
               [disabled]="authLoading() || !canSubmitAuth()"
             >
               @if (!authLoading()) {
-                @if (isRegisterMode()) { Create account } @else { Sign in }
-              } @else {
+              @if (isRegisterMode()) { Sign up } @else { Log in }
+            } @else {
                 <span class="spinner"></span>
               }
             </button>
