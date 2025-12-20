@@ -10,6 +10,15 @@
   color: #f8fafc;
 }
 
+.logo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.25rem;
+  border-radius: 18px;
+  display: block;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.35);
+}
+
 @media (max-width: 768px) {
   :host {
     padding: 1rem;
