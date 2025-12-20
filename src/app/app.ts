@@ -27,6 +27,7 @@ export class App {
   email = '';
   password = '';
   confirmPassword = '';
+  emailTouched = false;
 
   // --- UI state ---
   isLoggedIn = signal(false);
@@ -155,10 +156,12 @@ export class App {
   openAuth() {
     this.authError.set(null);
     this.isAuthOpen.set(true);
+    this.emailTouched = false;
   }
 
   closeAuth() {
     this.isAuthOpen.set(false);
+    this.emailTouched = false;
   }
 
   openLogoutConfirm() {
@@ -173,6 +176,7 @@ export class App {
     this.authMode.set(mode);
     this.authError.set(null);
     this.confirmPassword = '';
+    this.emailTouched = false;
   }
 
   isRegisterMode(): boolean {
@@ -185,8 +189,13 @@ export class App {
 
   canSubmitAuth(): boolean {
     if (!this.email.trim() || !this.password) return false;
+    if (!this.isValidEmail(this.email.trim())) return false;
     if (this.isRegisterMode() && this.password !== this.confirmPassword) return false;
     return true;
+  }
+
+  isValidEmail(value: string): boolean {
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
   }
 
   loadMyUrls(page: number) {
@@ -294,11 +303,28 @@ export class App {
   }
 
   private formatError(err: unknown, fallback: string): string {
-    const anyErr = err as { status?: number; message?: string; error?: { detail?: string } };
+    const anyErr = err as {
+      status?: number;
+      message?: string;
+      error?: { detail?: string | Array<{ msg?: string }> } | string;
+    };
     if (anyErr?.status === 0) {
       return fallback;
     }
-    return anyErr?.error?.detail || anyErr?.message || fallback;
+    if (typeof anyErr?.error === 'string') {
+      return anyErr.error;
+    }
+    const detail = anyErr?.error?.detail;
+    if (Array.isArray(detail)) {
+      const messages = detail
+        .map((item) => (item && typeof item.msg === 'string' ? item.msg : 'Invalid input'))
+        .join(', ');
+      return messages || fallback;
+    }
+    if (typeof detail === 'string') {
+      return detail;
+    }
+    return anyErr?.message || fallback;
   }
 
   // -------------------------

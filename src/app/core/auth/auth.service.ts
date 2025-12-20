@@ -18,6 +18,7 @@ export interface RegisterResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly authBaseUrl = environment.AUTH_API_BASE_URL;
+  private readonly clientId = environment.AUTH_CLIENT_ID;
 
   constructor(
     private http: HttpClient,
@@ -28,7 +29,7 @@ export class AuthService {
     const body = new URLSearchParams();
     body.set('username', email);
     body.set('password', password);
-    body.set('client_id', 'angular-web');
+    body.set('client_id', this.clientId);
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded',

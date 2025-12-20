@@ -263,10 +263,14 @@
                 name="email"
                 type="email"
                 [(ngModel)]="email"
+                (blur)="emailTouched = true"
                 class="input"
                 autocomplete="email"
                 placeholder="you@example.com"
               />
+              @if (emailTouched && email && !isValidEmail(email)) {
+                <p class="error">Please enter a valid email.</p>
+              }
             </div>
 
             <div class="auth-field">
