@@ -5,9 +5,12 @@
     <p class="subtitle">Paste a long URL, get a short one.</p>
     <div class="header-actions">
       @if (isLoggedIn()) {
-        <button type="button" class="icon-btn icon-btn-ghost account-btn" (click)="openAuth()">
+        <div class="logged-pill logged-pill-quiet">
           <span class="status-dot"></span>
-          Account
+          Online
+        </div>
+        <button type="button" class="icon-btn icon-btn-ghost" (click)="openLogoutConfirm()">
+          Log out
         </button>
       } @else {
         <button type="button" class="icon-btn icon-btn-ghost" (click)="openAuth()">
@@ -229,10 +232,12 @@
         </div>
 
         @if (!isLoggedIn()) {
-          <div class="auth-tabs">
+          <div class="auth-tabs" role="tablist" aria-label="Auth mode">
             <button
               type="button"
-              class="icon-btn icon-btn-ghost auth-tab"
+              class="auth-tab"
+              role="tab"
+              [attr.aria-selected]="!isRegisterMode()"
               [class.auth-tab-active]="!isRegisterMode()"
               (click)="setAuthMode('login')"
             >
@@ -240,7 +245,9 @@
             </button>
             <button
               type="button"
-              class="icon-btn icon-btn-ghost auth-tab"
+              class="auth-tab"
+              role="tab"
+              [attr.aria-selected]="isRegisterMode()"
               [class.auth-tab-active]="isRegisterMode()"
               (click)="setAuthMode('register')"
             >
@@ -292,12 +299,12 @@
 
             <button
               type="submit"
-              class="btn btn-primary"
+              class="icon-btn icon-btn-ghost auth-submit"
               [disabled]="authLoading() || !canSubmitAuth()"
             >
               @if (!authLoading()) {
-              @if (isRegisterMode()) { Sign up } @else { Log in }
-            } @else {
+                @if (isRegisterMode()) { Create account } @else { Continue }
+              } @else {
                 <span class="spinner"></span>
               }
             </button>
@@ -321,6 +328,28 @@
             </button>
           </div>
         }
+      </aside>
+    </div>
+  }
+
+  @if (isLogoutOpen()) {
+    <div class="auth-overlay" (click)="closeLogoutConfirm()">
+      <aside class="auth-panel auth-panel-compact" (click)="$event.stopPropagation()">
+        <div class="auth-panel-header">
+          <div class="auth-panel-text">
+            <div class="auth-title">Log out?</div>
+            <div class="auth-hint">Links created while logged out won’t appear in your history.</div>
+          </div>
+        </div>
+
+        <div class="logout-actions">
+          <button type="button" class="icon-btn icon-btn-ghost" (click)="closeLogoutConfirm()">
+            Stay logged in
+          </button>
+          <button type="button" class="icon-btn icon-btn-ghost auth-submit danger" (click)="logout()">
+            Log out
+          </button>
+        </div>
       </aside>
     </div>
   }

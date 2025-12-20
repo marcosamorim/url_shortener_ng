@@ -66,6 +66,24 @@
   box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
 }
 
+.logged-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  background: rgba(34, 197, 94, 0.12);
+  color: #bbf7d0;
+  font-weight: 600;
+}
+
+.logged-pill-quiet {
+  border-color: rgba(148, 163, 184, 0.25);
+  background: rgba(148, 163, 184, 0.08);
+  color: rgba(226, 232, 240, 0.75);
+}
+
 /* -------------------------------------------------------
    CARD
 -------------------------------------------------------- */
@@ -135,21 +153,27 @@
   display: flex;
   gap: 0.5rem;
   margin-top: 1rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
 }
 
 .auth-tab {
   flex: 1;
+  padding: 0.35rem 0.4rem 0.55rem;
+  border: none;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.6);
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.auth-tab.icon-btn-ghost {
-  padding: 0.4rem 0.7rem;
-  font-size: 0.8rem;
+.auth-tab:hover {
+  color: rgba(226, 232, 240, 0.85);
 }
 
 .auth-tab-active {
-  background: rgba(56, 189, 248, 0.2);
   color: #e2e8f0;
-  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: inset 0 -2px 0 rgba(129, 140, 248, 0.8);
 }
 
 .auth-form {
@@ -199,6 +223,23 @@
   font-size: 0.8rem;
 }
 
+.logout-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.danger {
+  border-color: rgba(248, 113, 113, 0.55);
+  background: rgba(248, 113, 113, 0.14);
+  color: #fecaca;
+}
+
+.danger:hover {
+  background: rgba(248, 113, 113, 0.22);
+}
+
 .auth-overlay {
   position: fixed;
   inset: 0;
@@ -219,6 +260,10 @@
   border: 1px solid rgba(148, 163, 184, 0.2);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
   animation: popIn 0.22s ease;
+}
+
+.auth-panel-compact {
+  width: min(420px, 100%);
 }
 
 .auth-panel-header {
@@ -257,6 +302,17 @@
   padding: 0.45rem 0.75rem;
   font-size: 0.85rem;
 }
+
+.auth-submit {
+  width: 100%;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  border-color: rgba(129, 140, 248, 0.55);
+  background: rgba(129, 140, 248, 0.12);
+  color: #e0e7ff;
+}
+
 
 @keyframes popIn {
   from {

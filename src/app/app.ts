@@ -31,6 +31,7 @@ export class App {
   // --- UI state ---
   isLoggedIn = signal(false);
   isAuthOpen = signal(false);
+  isLogoutOpen = signal(false);
   authLoading = signal(false);
   authError = signal<string | null>(null);
   authMode = signal<'login' | 'register'>('login');
@@ -145,6 +146,7 @@ export class App {
     this.email = '';
     this.password = '';
     this.confirmPassword = '';
+    this.isLogoutOpen.set(false);
     this.clearLogoutTimer();
     this.showToast('Logged out');
     this.cdr.detectChanges();
@@ -157,6 +159,14 @@ export class App {
 
   closeAuth() {
     this.isAuthOpen.set(false);
+  }
+
+  openLogoutConfirm() {
+    this.isLogoutOpen.set(true);
+  }
+
+  closeLogoutConfirm() {
+    this.isLogoutOpen.set(false);
   }
 
   setAuthMode(mode: 'login' | 'register') {
