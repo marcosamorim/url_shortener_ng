@@ -2,3 +2,5 @@ services:
   url-shortener-ng:
     build:
       context: .
+      args:
+        BUILD_CONFIGURATION: docker

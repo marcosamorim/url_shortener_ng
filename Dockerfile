@@ -1,12 +1,14 @@
 FROM node:20-alpine AS build
 
+ARG BUILD_CONFIGURATION=production
+
 WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+RUN npm run build -- --configuration $BUILD_CONFIGURATION
 
 FROM node:20-alpine AS runtime
 
