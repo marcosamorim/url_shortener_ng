@@ -30,7 +30,10 @@ services:
       - auth-service
 
   url-shortener-ng:
-    image: ghcr.io/marcosamorim/url_shortener_ng:latest
+    build:
+      context: .
+      args:
+        BUILD_CONFIGURATION: docker
     ports:
       - "4200:4200"
     environment:

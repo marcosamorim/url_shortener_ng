@@ -1,16 +1,20 @@
 <div class="page">
   <header class="header">
-    <div class="logo">rdrt</div>
+    <img class="logo" src="/logo.png" alt="rdrt logo" />
     <h1 class="title">URL Shortener</h1>
     <p class="subtitle">Paste a long URL, get a short one.</p>
     <div class="header-actions">
       @if (isLoggedIn()) {
-        <button type="button" class="btn btn-secondary" (click)="openAuth()">
-          Account
+        <div class="logged-pill logged-pill-quiet">
+          <span class="status-dot"></span>
+          Online
+        </div>
+        <button type="button" class="icon-btn icon-btn-ghost" (click)="openLogoutConfirm()">
+          Log out
         </button>
       } @else {
-        <button type="button" class="btn btn-secondary" (click)="openAuth()">
-          Sign in
+        <button type="button" class="icon-btn icon-btn-ghost" (click)="openAuth()">
+          Log in
         </button>
       }
     </div>
@@ -63,12 +67,12 @@
                 {{ result()!.short_url }}
               </a>
 
-              <button type="button" class="btn btn-secondary" (click)="copyShortUrl()">
+              <button type="button" class="icon-btn icon-btn-ghost" (click)="copyShortUrl()">
                 Copy
               </button>
 
-              <button type="button" class="btn btn-secondary" (click)="toggleQr()">
-                @if (showQr()) { Hide QR } @else { Show QR }
+              <button type="button" class="icon-btn icon-btn-ghost" (click)="toggleQr()">
+                @if (showQr()) { QR Off } @else { QR }
               </button>
             </div>
 
@@ -101,7 +105,7 @@
               <div class="qr-actions">
                 <button
                   type="button"
-                  class="btn btn-secondary qr-action-btn"
+                  class="icon-btn icon-btn-ghost qr-action-btn"
                   (click)="downloadQrCard()"
                 >
                   Download card
@@ -109,7 +113,7 @@
 
                 <button
                   type="button"
-                  class="btn btn-secondary qr-action-btn"
+                  class="icon-btn icon-btn-ghost qr-action-btn"
                   (click)="copyQrCardToClipboard()"
                 >
                   Copy card
@@ -124,26 +128,35 @@
     @if (isLoggedIn()) {
       <section class="my-urls">
         <div class="my-urls-head">
-          <h2 class="result-title">My URLs</h2>
           <div class="my-urls-actions">
-            <div class="my-urls-meta">
-              Page {{ myUrlsPage() }} / {{ myUrlsTotalPages }}
+            <div class="my-urls-left">
+              <button type="button" class="icon-btn icon-btn-ghost" (click)="toggleMyUrls()">
+                @if (myUrlsOpen()) { History · Hide } @else { History · Show }
+              </button>
+              @if (myUrlsOpen()) {
+                <button
+                  type="button"
+                  class="icon-btn icon-btn-ghost"
+                  (click)="refreshMyUrls()"
+                  [disabled]="myUrlsLoading()"
+                  aria-label="Refresh history"
+                  title="Refresh"
+                >
+                  ↻
+                </button>
+              }
             </div>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              (click)="refreshMyUrls()"
-              [disabled]="myUrlsLoading()"
-            >
-              Refresh
-            </button>
-            <button type="button" class="btn btn-secondary" (click)="toggleMyUrls()">
-              @if (myUrlsOpen()) { Collapse } @else { Expand }
-            </button>
+            @if (myUrlsOpen()) {
+              <button type="button" class="link-btn my-urls-meta" disabled>
+                Page {{ myUrlsPage() }} / {{ myUrlsTotalPages }}
+              </button>
+            }
           </div>
         </div>
 
         @if (myUrlsOpen()) {
+          <div class="my-urls-title">My History</div>
+
           @if (myUrlsLoading()) {
             <div class="my-urls-empty">Loading your URLs...</div>
           } @else if (myUrlsError()) {
@@ -177,7 +190,7 @@
             <div class="pagination">
               <button
                 type="button"
-                class="btn btn-secondary"
+                class="icon-btn icon-btn-ghost"
                 (click)="prevMyUrlsPage()"
                 [disabled]="myUrlsPage() <= 1"
               >
@@ -185,7 +198,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-secondary"
+                class="icon-btn icon-btn-ghost"
                 (click)="nextMyUrlsPage()"
                 [disabled]="myUrlsPage() >= myUrlsTotalPages"
               >
@@ -204,17 +217,45 @@
     <div class="auth-overlay" (click)="closeAuth()">
       <aside class="auth-panel" (click)="$event.stopPropagation()">
         <div class="auth-panel-header">
-          <div>
-            <div class="auth-title">Sign in (optional)</div>
-            <div class="auth-hint">
-              Sign in to tie links to your account and see private stats later.
-            </div>
+          <div class="auth-panel-text">
+            @if (isRegisterMode()) {
+              <div class="auth-title">Create your account</div>
+              <div class="auth-hint">Sign up to keep your links and access private stats.</div>
+            } @else {
+              <div class="auth-title">Welcome back</div>
+              <div class="auth-hint">Log in to tie links to your account or create a new one.</div>
+            }
           </div>
-          <button type="button" class="btn btn-secondary" (click)="closeAuth()">Close</button>
+          <button type="button" class="icon-btn" (click)="closeAuth()" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
         </div>
 
         @if (!isLoggedIn()) {
-          <form class="auth-form" (submit)="login()">
+          <div class="auth-tabs" role="tablist" aria-label="Auth mode">
+            <button
+              type="button"
+              class="auth-tab"
+              role="tab"
+              [attr.aria-selected]="!isRegisterMode()"
+              [class.auth-tab-active]="!isRegisterMode()"
+              (click)="setAuthMode('login')"
+            >
+              Log in
+            </button>
+            <button
+              type="button"
+              class="auth-tab"
+              role="tab"
+              [attr.aria-selected]="isRegisterMode()"
+              [class.auth-tab-active]="isRegisterMode()"
+              (click)="setAuthMode('register')"
+            >
+              Sign up
+            </button>
+          </div>
+
+          <form class="auth-form" (submit)="isRegisterMode() ? register() : login()">
             <div class="auth-field">
               <label class="label" for="email">Email</label>
               <input
@@ -222,10 +263,14 @@
                 name="email"
                 type="email"
                 [(ngModel)]="email"
+                (blur)="emailTouched = true"
                 class="input"
                 autocomplete="email"
                 placeholder="you@example.com"
               />
+              @if (emailTouched && email && !isValidEmail(email)) {
+                <p class="error">Please enter a valid email.</p>
+              }
             </div>
 
             <div class="auth-field">
@@ -241,30 +286,74 @@
               />
             </div>
 
+            @if (isRegisterMode()) {
+              <div class="auth-field">
+                <label class="label" for="confirm-password">Confirm password</label>
+                <input
+                  id="confirm-password"
+                  name="confirm-password"
+                  type="password"
+                  [(ngModel)]="confirmPassword"
+                  class="input"
+                  autocomplete="new-password"
+                  placeholder="••••••••"
+                />
+              </div>
+            }
+
             <button
               type="submit"
-              class="btn btn-primary"
-              [disabled]="authLoading() || !email.trim() || !password"
+              class="icon-btn icon-btn-ghost auth-submit"
+              [disabled]="authLoading() || !canSubmitAuth()"
             >
               @if (!authLoading()) {
-                Sign in
+                @if (isRegisterMode()) { Create account } @else { Continue }
               } @else {
                 <span class="spinner"></span>
               }
             </button>
+
+            @if (passwordsMismatch()) {
+              <p class="error">Passwords do not match.</p>
+            }
 
             @if (authError()) {
               <p class="error">{{ authError() }}</p>
             }
           </form>
         } @else {
-          <div class="auth-status auth-status-on">Signed in</div>
-          <div class="auth-actions">
-            <button type="button" class="btn btn-secondary" (click)="logout()">
-              Sign out
+          <div class="auth-logged">
+            <div class="auth-logged-badge">
+              <span class="auth-logged-icon">✓</span>
+              Logged in
+            </div>
+            <button type="button" class="icon-btn icon-btn-ghost" (click)="logout()">
+              Log out
             </button>
           </div>
         }
+      </aside>
+    </div>
+  }
+
+  @if (isLogoutOpen()) {
+    <div class="auth-overlay" (click)="closeLogoutConfirm()">
+      <aside class="auth-panel auth-panel-compact" (click)="$event.stopPropagation()">
+        <div class="auth-panel-header">
+          <div class="auth-panel-text">
+            <div class="auth-title">Log out?</div>
+            <div class="auth-hint">Links created while logged out won’t appear in your history.</div>
+          </div>
+        </div>
+
+        <div class="logout-actions">
+          <button type="button" class="icon-btn icon-btn-ghost" (click)="closeLogoutConfirm()">
+            Stay logged in
+          </button>
+          <button type="button" class="icon-btn icon-btn-ghost auth-submit danger" (click)="logout()">
+            Log out
+          </button>
+        </div>
       </aside>
     </div>
   }

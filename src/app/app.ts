@@ -18,6 +18,7 @@ import { TokenService } from './services/token.service';
 })
 export class App {
   title = 'URL Shortener';
+  private logoutTimerId: number | null = null;
 
   // --- Shorten form ---
   url = '';
@@ -25,12 +26,16 @@ export class App {
   // --- Login form (optional) ---
   email = '';
   password = '';
+  confirmPassword = '';
+  emailTouched = false;
 
   // --- UI state ---
   isLoggedIn = signal(false);
   isAuthOpen = signal(false);
+  isLogoutOpen = signal(false);
   authLoading = signal(false);
   authError = signal<string | null>(null);
+  authMode = signal<'login' | 'register'>('login');
 
   isLoading = signal(false);
   error = signal<string | null>(null);
@@ -41,7 +46,7 @@ export class App {
   myUrlsPageSize = 5;
   myUrlsLoading = signal(false);
   myUrlsError = signal<string | null>(null);
-  myUrlsOpen = signal(true);
+  myUrlsOpen = signal(false);
 
   toastMessage = signal<string | null>(null);
 
@@ -59,11 +64,7 @@ export class App {
     private cdr: ChangeDetectorRef,
   ) {
     // Initial state
-    const hasToken = !!this.tokenService.token();
-    this.isLoggedIn.set(hasToken);
-    if (hasToken) {
-      this.loadMyUrls(1);
-    }
+    this.syncAuthState(false);
   }
 
   // -------------------------
@@ -79,16 +80,56 @@ export class App {
     this.auth.login(email, password).subscribe({
       next: () => {
         this.authLoading.set(false);
-        this.isLoggedIn.set(true);
         this.isAuthOpen.set(false);
-        this.loadMyUrls(1);
+        this.result.set(null);
+        this.showQr.set(false);
+        this.syncAuthState(true);
         this.showToast('Logged in');
         this.cdr.detectChanges();
       },
       error: (err) => {
         this.authLoading.set(false);
-        const msg = err?.error?.detail || err?.message || 'Login failed';
-        this.authError.set(msg);
+        this.authError.set(this.formatError(err, 'Auth service is unavailable. Please try again.'));
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  register() {
+    this.authError.set(null);
+    this.authLoading.set(true);
+
+    const email = this.email.trim();
+    const password = this.password;
+
+    if (!email || !password || this.passwordsMismatch()) {
+      this.authLoading.set(false);
+      this.authError.set('Please check your details and try again.');
+      return;
+    }
+
+    this.auth.register(email, password).subscribe({
+      next: () => {
+        this.auth.login(email, password).subscribe({
+          next: () => {
+            this.authLoading.set(false);
+            this.isAuthOpen.set(false);
+            this.result.set(null);
+            this.showQr.set(false);
+            this.syncAuthState(true);
+            this.showToast('Account created');
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.authLoading.set(false);
+            this.authError.set(this.formatError(err, 'Login failed after registration.'));
+            this.cdr.detectChanges();
+          },
+        });
+      },
+      error: (err) => {
+        this.authLoading.set(false);
+        this.authError.set(this.formatError(err, 'Registration failed. Please try again.'));
         this.cdr.detectChanges();
       },
     });
@@ -101,6 +142,13 @@ export class App {
     this.myUrls.set([]);
     this.myUrlsTotal.set(0);
     this.myUrlsPage.set(1);
+    this.result.set(null);
+    this.showQr.set(false);
+    this.email = '';
+    this.password = '';
+    this.confirmPassword = '';
+    this.isLogoutOpen.set(false);
+    this.clearLogoutTimer();
     this.showToast('Logged out');
     this.cdr.detectChanges();
   }
@@ -108,13 +156,50 @@ export class App {
   openAuth() {
     this.authError.set(null);
     this.isAuthOpen.set(true);
+    this.emailTouched = false;
   }
 
   closeAuth() {
     this.isAuthOpen.set(false);
+    this.emailTouched = false;
+  }
+
+  openLogoutConfirm() {
+    this.isLogoutOpen.set(true);
+  }
+
+  closeLogoutConfirm() {
+    this.isLogoutOpen.set(false);
+  }
+
+  setAuthMode(mode: 'login' | 'register') {
+    this.authMode.set(mode);
+    this.authError.set(null);
+    this.confirmPassword = '';
+    this.emailTouched = false;
+  }
+
+  isRegisterMode(): boolean {
+    return this.authMode() === 'register';
+  }
+
+  passwordsMismatch(): boolean {
+    return this.isRegisterMode() && !!this.confirmPassword && this.password !== this.confirmPassword;
+  }
+
+  canSubmitAuth(): boolean {
+    if (!this.email.trim() || !this.password) return false;
+    if (!this.isValidEmail(this.email.trim())) return false;
+    if (this.isRegisterMode() && this.password !== this.confirmPassword) return false;
+    return true;
+  }
+
+  isValidEmail(value: string): boolean {
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
   }
 
   loadMyUrls(page: number) {
+    if (!this.isLoggedIn()) return;
     this.myUrlsLoading.set(true);
     this.myUrlsError.set(null);
     this.myUrlsPage.set(page);
@@ -128,11 +213,9 @@ export class App {
       },
       error: (err) => {
         this.myUrlsLoading.set(false);
-        const msg =
-          err?.error?.detail ||
-          err?.message ||
-          'Failed to load your URLs. Please try again.';
-        this.myUrlsError.set(msg);
+        this.myUrlsError.set(
+          this.formatError(err, 'Shortener service is unavailable. Please try again.'),
+        );
         this.cdr.detectChanges();
       },
     });
@@ -169,6 +252,79 @@ export class App {
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return value;
     return parsed.toLocaleString();
+  }
+
+  private syncAuthState(showExpiredToast: boolean) {
+    const token = this.tokenService.get();
+    if (!token) {
+      this.isLoggedIn.set(false);
+      this.clearLogoutTimer();
+      return;
+    }
+
+    if (this.tokenService.isExpired()) {
+      this.tokenService.clear();
+      this.isLoggedIn.set(false);
+      this.clearLogoutTimer();
+      if (showExpiredToast) {
+        this.showToast('Session expired');
+      }
+      return;
+    }
+
+    this.isLoggedIn.set(true);
+    this.loadMyUrls(1);
+    this.scheduleLogout();
+  }
+
+  private scheduleLogout() {
+    this.clearLogoutTimer();
+    if (typeof window === 'undefined') return;
+
+    const exp = this.tokenService.getExpiryEpochSeconds();
+    if (!exp) return;
+
+    const delayMs = exp * 1000 - Date.now();
+    if (delayMs <= 0) {
+      this.syncAuthState(true);
+      return;
+    }
+
+    this.logoutTimerId = window.setTimeout(() => {
+      this.syncAuthState(true);
+      this.cdr.detectChanges();
+    }, delayMs);
+  }
+
+  private clearLogoutTimer() {
+    if (this.logoutTimerId === null || typeof window === 'undefined') return;
+    window.clearTimeout(this.logoutTimerId);
+    this.logoutTimerId = null;
+  }
+
+  private formatError(err: unknown, fallback: string): string {
+    const anyErr = err as {
+      status?: number;
+      message?: string;
+      error?: { detail?: string | Array<{ msg?: string }> } | string;
+    };
+    if (anyErr?.status === 0) {
+      return fallback;
+    }
+    if (typeof anyErr?.error === 'string') {
+      return anyErr.error;
+    }
+    const detail = anyErr?.error?.detail;
+    if (Array.isArray(detail)) {
+      const messages = detail
+        .map((item) => (item && typeof item.msg === 'string' ? item.msg : 'Invalid input'))
+        .join(', ');
+      return messages || fallback;
+    }
+    if (typeof detail === 'string') {
+      return detail;
+    }
+    return anyErr?.message || fallback;
   }
 
   // -------------------------
@@ -211,11 +367,7 @@ export class App {
       },
       error: (err) => {
         this.isLoading.set(false);
-        const msg =
-          err?.error?.detail ||
-          err?.message ||
-          'Failed to shorten URL. Please try again.';
-        this.error.set(msg);
+        this.error.set(this.formatError(err, 'Failed to shorten URL. Please try again.'));
         this.cdr.detectChanges();
       },
     });
