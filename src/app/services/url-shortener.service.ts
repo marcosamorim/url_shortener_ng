@@ -32,6 +32,8 @@ export interface MyUrlItem {
   original_url: string;
   clicks: number;
   created_at: string;
+  is_active: boolean;
+  expires_at?: string | null;
 }
 
 export interface MyUrlsResponse {
@@ -48,10 +50,15 @@ export class UrlShortenerService {
 
   constructor(private http: HttpClient, private tokenService: TokenService) {}
 
-  shorten(url: string): Observable<ShortenResponse> {
-    return this.http.post<ShortenResponse>(`${this.apiBaseUrl}/api/v${this.apiVersion}/shorten`, {
-      url,
-    });
+  shorten(url: string, expiresAt?: string | null): Observable<ShortenResponse> {
+    const payload: { url: string; expires_at?: string | null } = { url };
+    if (expiresAt !== undefined) {
+      payload.expires_at = expiresAt;
+    }
+    return this.http.post<ShortenResponse>(
+      `${this.apiBaseUrl}/api/v${this.apiVersion}/shorten`,
+      payload,
+    );
   }
 
   stats(code: string): Observable<StatsPublic | StatsPrivate> {

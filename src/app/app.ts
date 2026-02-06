@@ -22,6 +22,8 @@ export class App {
 
   // --- Shorten form ---
   url = '';
+  expiresAtInput = '';
+  showAdvancedCreate = false;
 
   // --- Login form (optional) ---
   email = '';
@@ -47,6 +49,10 @@ export class App {
   myUrlsLoading = signal(false);
   myUrlsError = signal<string | null>(null);
   myUrlsOpen = signal(false);
+  expiryInputs: Record<string, string> = {};
+  actionLoading: Record<string, boolean> = {};
+  actionError: Record<string, string | null> = {};
+  openAdvanced: Record<string, boolean> = {};
 
   toastMessage = signal<string | null>(null);
 
@@ -144,6 +150,7 @@ export class App {
     this.myUrlsPage.set(1);
     this.result.set(null);
     this.showQr.set(false);
+    this.expiresAtInput = '';
     this.email = '';
     this.password = '';
     this.confirmPassword = '';
@@ -203,6 +210,10 @@ export class App {
     this.myUrlsLoading.set(true);
     this.myUrlsError.set(null);
     this.myUrlsPage.set(page);
+    this.expiryInputs = {};
+    this.openAdvanced = {};
+    this.actionError = {};
+    this.actionLoading = {};
 
     this.urlShortener.myUrls(page, this.myUrlsPageSize).subscribe({
       next: (res) => {
@@ -229,6 +240,7 @@ export class App {
     this.myUrlsOpen.update((value) => !value);
   }
 
+
   get myUrlsTotalPages(): number {
     return Math.max(1, Math.ceil(this.myUrlsTotal() / this.myUrlsPageSize));
   }
@@ -252,6 +264,100 @@ export class App {
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return value;
     return parsed.toLocaleString();
+  }
+
+  formatDateInput(value?: string | null): string {
+    if (!value) return '';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '';
+    return parsed.toISOString().slice(0, 16);
+  }
+
+  private parseExpiryInput(value: string): { iso: string | null; error?: string } {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return { iso: null };
+    }
+
+    const normalised = trimmed.includes('T') ? trimmed : trimmed.replace(' ', 'T');
+    const parsed = new Date(normalised);
+    if (Number.isNaN(parsed.getTime())) {
+      return { iso: null, error: 'Use format YYYY-MM-DD HH:mm.' };
+    }
+
+    return { iso: parsed.toISOString() };
+  }
+
+  getExpiryInput(item: MyUrlItem): string {
+    return this.expiryInputs[item.code] ?? this.formatDateInput(item.expires_at);
+  }
+
+  setExpiryInput(code: string, value: string) {
+    this.expiryInputs[code] = value;
+  }
+
+  toggleAdvancedCreate() {
+    this.showAdvancedCreate = !this.showAdvancedCreate;
+    this.expiresAtInput = '';
+  }
+
+  toggleAdvancedItem(code: string) {
+    this.openAdvanced[code] = !this.openAdvanced[code];
+  }
+
+  toggleActive(item: MyUrlItem) {
+    this.setActionLoading(item.code, true);
+    this.urlShortener.updateLink(item.code, { is_active: !item.is_active }).subscribe({
+      next: () => {
+        this.updateMyUrlItem(item.code, { is_active: !item.is_active });
+        this.setActionLoading(item.code, false);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.setActionError(item.code, this.formatError(err, 'Failed to update link.'));
+        this.setActionLoading(item.code, false);
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  saveExpiry(item: MyUrlItem) {
+    const value = this.getExpiryInput(item);
+    const parsed = this.parseExpiryInput(value);
+    if (parsed.error) {
+      this.setActionError(item.code, parsed.error);
+      return;
+    }
+
+    this.setActionLoading(item.code, true);
+    this.urlShortener.updateLink(item.code, { expires_at: parsed.iso }).subscribe({
+      next: () => {
+        this.updateMyUrlItem(item.code, { expires_at: parsed.iso });
+        this.setActionLoading(item.code, false);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.setActionError(item.code, this.formatError(err, 'Failed to update expiry.'));
+        this.setActionLoading(item.code, false);
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private updateMyUrlItem(code: string, updates: Partial<MyUrlItem>) {
+    const updated = this.myUrls().map((item) =>
+      item.code === code ? { ...item, ...updates } : item,
+    );
+    this.myUrls.set(updated);
+  }
+
+  private setActionLoading(code: string, loading: boolean) {
+    this.actionLoading[code] = loading;
+    this.actionError[code] = null;
+  }
+
+  private setActionError(code: string, message: string) {
+    this.actionError[code] = message;
   }
 
   private syncAuthState(showExpiredToast: boolean) {
@@ -356,10 +462,18 @@ export class App {
     this.showQr.set(false);
     this.cdr.detectChanges();
 
-    this.urlShortener.shorten(normalisedUrl).subscribe({
+    const parsedExpiry = this.parseExpiryInput(this.expiresAtInput);
+    if (parsedExpiry.error) {
+      this.error.set(parsedExpiry.error);
+      this.isLoading.set(false);
+      return;
+    }
+
+    this.urlShortener.shorten(normalisedUrl, parsedExpiry.iso ?? undefined).subscribe({
       next: (res) => {
         this.result.set(res);
         this.isLoading.set(false);
+        this.expiresAtInput = '';
         if (this.isLoggedIn()) {
           this.loadMyUrls(1);
         }
