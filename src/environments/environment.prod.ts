@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  API_VERSION: '0',
+  API_VERSION: '1',
   SHORTENER_API_BASE_URL: 'https://rdrt.me',
   AUTH_API_BASE_URL: 'https://auth.rdrt.me',
   AUTH_TOKEN_PATH: '/auth/login',
