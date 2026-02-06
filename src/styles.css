@@ -67,6 +67,11 @@ body {
   outline: none;
 }
 
+.input-small {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.85rem;
+}
+
 .input:focus {
   border-color: #38bdf8;
   box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
@@ -583,13 +588,9 @@ button:disabled {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #60a5fa, #a855f7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 700;
-  font-size: 0.8rem;
+  background: #ffffff;
+  padding: 4px;
+  object-fit: contain;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
@@ -663,12 +664,18 @@ button:disabled {
 
 .my-urls-item {
   display: flex;
-  justify-content: space-between;
-  gap: 1.5rem;
+  flex-direction: column;
+  gap: 0.75rem;
   padding: 1rem;
   border-radius: 0.75rem;
   background: rgba(15, 23, 42, 0.5);
   border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.my-urls-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
 }
 
 .my-urls-main {
@@ -687,6 +694,61 @@ button:disabled {
   display: flex;
   gap: 1.5rem;
   min-width: 180px;
+}
+
+.status-text {
+  font-weight: 600;
+}
+
+.status-text-active {
+  color: rgba(110, 231, 183, 0.95);
+}
+
+.status-text-inactive {
+  color: rgba(248, 113, 113, 0.9);
+}
+
+.my-urls-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.my-urls-advanced {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.expiry-edit {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.expiry-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.expiry-help {
+  font-size: 0.75rem;
+  color: rgba(148, 163, 184, 0.75);
+}
+
+.expiry-row {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.advanced-toggle {
+  margin-top: 0.5rem;
+  align-self: flex-start;
 }
 
 .my-urls-empty {
@@ -755,11 +817,25 @@ button:disabled {
     flex-direction: column;
   }
 
+  .my-urls-top {
+    flex-direction: column;
+  }
+
   .my-urls-stats {
     min-width: 0;
   }
 
+  .my-urls-actions-row {
+    margin-top: 0.5rem;
+  }
+
   .my-urls-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .expiry-edit {
     flex-direction: column;
     align-items: stretch;
     width: 100%;

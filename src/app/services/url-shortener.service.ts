@@ -32,6 +32,8 @@ export interface MyUrlItem {
   original_url: string;
   clicks: number;
   created_at: string;
+  is_active: boolean;
+  expires_at?: string | null;
 }
 
 export interface MyUrlsResponse {
@@ -44,22 +46,43 @@ export interface MyUrlsResponse {
 @Injectable({ providedIn: 'root' })
 export class UrlShortenerService {
   private readonly apiBaseUrl = environment.SHORTENER_API_BASE_URL;
+  private readonly apiVersion = environment.API_VERSION || '0';
 
   constructor(private http: HttpClient, private tokenService: TokenService) {}
 
-  shorten(url: string): Observable<ShortenResponse> {
-    return this.http.post<ShortenResponse>(`${this.apiBaseUrl}/api/shorten`, { url });
+  shorten(url: string, expiresAt?: string | null): Observable<ShortenResponse> {
+    const payload: { url: string; expires_at?: string | null } = { url };
+    if (expiresAt !== undefined) {
+      payload.expires_at = expiresAt;
+    }
+    return this.http.post<ShortenResponse>(
+      `${this.apiBaseUrl}/api/v${this.apiVersion}/shorten`,
+      payload,
+    );
   }
 
   stats(code: string): Observable<StatsPublic | StatsPrivate> {
-    return this.http.get<StatsPublic | StatsPrivate>(`${this.apiBaseUrl}/api/stats/${code}`, {
-      headers: this.authHeadersIfAny(),
-    });
+    return this.http.get<StatsPublic | StatsPrivate>(
+      `${this.apiBaseUrl}/api/v${this.apiVersion}/stats/${code}`,
+      {
+        headers: this.authHeadersIfAny(),
+      },
+    );
   }
 
   myUrls(page = 1, pageSize = 10): Observable<MyUrlsResponse> {
     return this.http.get<MyUrlsResponse>(
-      `${this.apiBaseUrl}/api/me/urls?page=${page}&page_size=${pageSize}`,
+      `${this.apiBaseUrl}/api/v${this.apiVersion}/me/urls?page=${page}&page_size=${pageSize}`,
+    );
+  }
+
+  updateLink(code: string, payload: { is_active?: boolean; expires_at?: string | null }) {
+    return this.http.patch(
+      `${this.apiBaseUrl}/api/v${this.apiVersion}/links/${code}`,
+      payload,
+      {
+        headers: this.authHeadersIfAny(),
+      },
     );
   }
 

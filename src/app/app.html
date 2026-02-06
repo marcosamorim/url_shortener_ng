@@ -49,6 +49,25 @@
       @if (error()) {
         <p class="error">{{ error() }}</p>
       }
+
+      <button type="button" class="link-btn advanced-toggle" (click)="toggleAdvancedCreate()">
+        @if (showAdvancedCreate) { Hide advanced options } @else { Show advanced options }
+      </button>
+
+      @if (showAdvancedCreate) {
+        <div class="expiry-row">
+          <label for="expiresAt" class="label">Expires at (optional)</label>
+          <input
+            id="expiresAt"
+            name="expiresAt"
+            type="text"
+            [(ngModel)]="expiresAtInput"
+            class="input input-small"
+            autocomplete="off"
+            placeholder="YYYY-MM-DD HH:mm"
+          />
+        </div>
+      }
     </form>
 
     @if (result()) {
@@ -97,7 +116,7 @@
                   ></qrcode>
 
                   <div class="qr-logo">
-                    <div class="qr-logo-inner">rdrt</div>
+                    <img class="qr-logo-inner" src="/logo.png" alt="rdrt logo" />
                   </div>
                 </div>
               </div>
@@ -167,22 +186,83 @@
             <div class="my-urls-list">
               @for (item of myUrls(); track item.code) {
                 <div class="my-urls-item">
-                  <div class="my-urls-main">
-                    <a class="short-url" [href]="item.short_url" target="_blank" rel="noopener">
-                      {{ item.short_url }}
-                    </a>
-                    <div class="my-urls-original">{{ item.original_url }}</div>
-                  </div>
-                  <div class="my-urls-stats">
-                    <div>
-                      <div class="meta-label">Clicks</div>
-                      <div class="meta-value">{{ item.clicks }}</div>
+                  <div class="my-urls-top">
+                    <div class="my-urls-main">
+                      <a class="short-url" [href]="item.short_url" target="_blank" rel="noopener">
+                        {{ item.short_url }}
+                      </a>
+                      <div class="my-urls-original">{{ item.original_url }}</div>
                     </div>
-                    <div>
-                      <div class="meta-label">Created</div>
-                      <div class="meta-value">{{ formatDate(item.created_at) }}</div>
+                    <div class="my-urls-stats">
+                      <div>
+                        <div class="meta-label">Clicks</div>
+                        <div class="meta-value">{{ item.clicks }}</div>
+                      </div>
+                      <div>
+                        <div class="meta-label">Created</div>
+                        <div class="meta-value">{{ formatDate(item.created_at) }}</div>
+                      </div>
+                      <div>
+                        <div class="meta-label">Status</div>
+                        <div
+                          class="meta-value status-text"
+                          [class.status-text-active]="item.is_active"
+                          [class.status-text-inactive]="!item.is_active"
+                        >
+                          {{ item.is_active ? 'Active' : 'Inactive' }}
+                        </div>
+                      </div>
                     </div>
                   </div>
+
+                  <div class="my-urls-actions-row">
+                    <button
+                      type="button"
+                      class="link-btn advanced-toggle"
+                      (click)="toggleAdvancedItem(item.code)"
+                    >
+                      @if (openAdvanced[item.code]) { Hide options } @else { Show options }
+                    </button>
+                  </div>
+
+                  @if (openAdvanced[item.code]) {
+                    <div class="my-urls-advanced">
+                      <button
+                        type="button"
+                        class="icon-btn icon-btn-ghost"
+                        (click)="toggleActive(item)"
+                        [disabled]="actionLoading[item.code]"
+                      >
+                        @if (item.is_active) { Deactivate } @else { Activate }
+                      </button>
+                      <div class="expiry-edit">
+                        <div class="expiry-field">
+                          <div class="meta-label">Expires at</div>
+                          <input
+                            type="text"
+                            [ngModel]="getExpiryInput(item)"
+                            (ngModelChange)="setExpiryInput(item.code, $event)"
+                            class="input input-small"
+                            autocomplete="off"
+                            placeholder="YYYY-MM-DD HH:mm"
+                          />
+                          <div class="expiry-help">Leave blank for no expiry.</div>
+                        </div>
+                        <button
+                          type="button"
+                          class="icon-btn icon-btn-ghost"
+                          (click)="saveExpiry(item)"
+                          [disabled]="actionLoading[item.code]"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  }
+
+                  @if (actionError[item.code]) {
+                    <p class="error">{{ actionError[item.code] }}</p>
+                  }
                 </div>
               }
             </div>
